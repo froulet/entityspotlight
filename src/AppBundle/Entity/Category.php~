@@ -1,0 +1,26 @@
+<?php
+// src/AppBundle/Entity/Category.php
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="Category")
+ */
+class Category
+{
+    /**
+     * @ORM\Column(type="string")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $categoryTitle;
+
+
+    /**
+     * @ORM\Column(type="string", length=200)
+     */
+    protected $description;
+}
+?>

@@ -1,0 +1,38 @@
+<?php
+// src/AppBundle/Entity/Revision.php
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="Revision")
+ */
+class Revision
+{
+    /**
+     * @ORM\Column(type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $idRevision;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    protected $idEntity;
+
+
+    /**
+     * @ORM\Column(type="string", length=100)
+     */
+    protected $categoryTitle;
+
+
+    /**
+     * @ORM\Column(type="datetime", length=100)
+     */
+    protected $date;
+
+}
+    ?>
