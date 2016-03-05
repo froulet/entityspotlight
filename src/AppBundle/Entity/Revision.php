@@ -9,11 +9,17 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="revision")
  */
 class Revision
-{
+{   
+
     /**
      * @ORM\Column(type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+
+    /**
+     * @ORM\Column(type="integer")
      */
     protected $idRevision;
 
@@ -43,6 +49,20 @@ class Revision
     public function getIdRevision()
     {
         return $this->idRevision;
+    }
+
+    /**
+     * Set idRevision
+     *
+     * @param integer $idRevision
+     *
+     * @return Revision
+     */
+    public function setIdRevision($idRevision)
+    {
+        $this->idRevision = $idRevision;
+
+        return $this;
     }
 
     /**

@@ -13,7 +13,6 @@ class Entity
     /**
      * @ORM\Column(type="integer")
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $idEntity;
 
@@ -46,6 +45,19 @@ class Entity
     {
         return $this->idEntity;
     }
+
+        /**
+     * Get idEntity
+     *
+     * @return integer
+     */
+    public function setIdEntity($id)
+    {
+        $this->idEntity = $id;
+
+        return $this;
+    }
+
 
     /**
      * Set title
