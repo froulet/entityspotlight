@@ -24,6 +24,16 @@ class DefaultController extends Controller
         return $this->render('home.html.twig');
     }
 
+    /**
+     * @Route("/entity", name="entity")
+     */
+    public function entityAction(Request $request)
+    {
+        // replace this example code with whatever you need
+        return $this->render('entity.html.twig');
+    }
+
+
         /**
      * @Route("/installdone", name="installed")
      */
