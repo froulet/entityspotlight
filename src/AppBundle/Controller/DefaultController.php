@@ -48,7 +48,7 @@ class DefaultController extends Controller
     {
         $revid = $this->getDoctrine()
         ->getRepository('AppBundle:Revision')
-        ->find($revid;
+        ->find($revid);
 
         //$serializer = new Serializer($normalizers, $encoders);
 
