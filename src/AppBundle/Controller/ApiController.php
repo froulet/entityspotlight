@@ -45,6 +45,15 @@ class ApiController extends Controller
         ->getRepository('AppBundle:Revision')
         ->findByidEntity($entityid);
 
+        $em = $this->getDoctrine()->getManager();
+        $query = $em->createQuery(
+                'SELECT p.idRevision, p.date
+                FROM AppBundle:Revision p
+                GROUP BY p.idRevision'
+            );
+
+        $revisions = $query->getResult();
+        
         $encoders = array(new XmlEncoder(), new JsonEncoder());
         $normalizers = array(new ObjectNormalizer());
         $serializer = new Serializer($normalizers, $encoders);
