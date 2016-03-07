@@ -1,0 +1,30 @@
+nav
+{
+	height: 155px;
+}
+
+footer.page-footer 
+{
+	margin-top: 0 !important;
+}
+
+.min, .min3
+{
+	padding: 0 !important;
+}
+
+.min img
+{
+	    
+}
+
+.min3 img
+{
+	margin-top: -6px;
+}
+
+.vertop h2
+{
+
+margin: 0 0 1.424rem 0;
+}
