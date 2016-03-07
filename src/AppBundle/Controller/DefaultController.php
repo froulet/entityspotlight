@@ -25,11 +25,19 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/entity", name="entity")
+     * @Route("/search", name="research")
      */
     public function entityAction(Request $request)
     {
-        // replace this example code with whatever you need
+        return $this->render('search.html.twig');
+    }
+
+    /**
+     * @Route("/entity/selected", name="selectedentity")
+     */
+    public function selectedEntityAction(Request $request)
+    {
+
         return $this->render('entity.html.twig');
     }
 
@@ -58,18 +66,29 @@ class DefaultController extends Controller
 
         list($pageid, $extract)=self::getDescription($slug);
 
+        $type=self::getType($slug);
+
+        $entity = $this->getDoctrine()
+        ->getRepository('AppBundle:Entity')
+        ->find($pageid);
+
+        //Si l'entité n'existe pas déjà, on la crée
+        if (!$entity) {
+            $entity = new Entity();
+        }
+         
+         $entity->setIdEntity($pageid);
+         $entity->setTitle($slug);
+         $entity->setType($type);
+         $entity->setDescription($extract);
+         $entity->setImglink("CUCK");
+         $em = $this->getDoctrine()->getManager();
+         $em->persist($entity);
+         $em->flush();
+            
+
         $continue = null;
         $revisions = array();
-
-            // $entity = new Entity();
-            // $entity->setIdEntity($pageid);
-            // $entity->setTitle($slug);
-            // $entity->setType("Unknow");
-            // $entity->setDescription($extract);
-            // $entity->setImglink("KEK");
-            // $em = $this->getDoctrine()->getManager();
-            // $em->persist($entity);
-            // $em->flush();
 
         do{
         list($revisions, $continue) = self::getRevisions($pageid, $continue, $revisions);
@@ -201,6 +220,7 @@ class DefaultController extends Controller
     public static function getDescription($slug){
      $url = "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=select+distinct+%3Fid+%3Fabstract+where+%7B%0D%0A%0D%0A%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F".$slug."%3E+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2FwikiPageID%3E+%3Fid+.%0D%0A%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F".$slug."%3E+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2Fabstract%3E+%3Fabstract%0D%0A%0D%0AFILTER+langMatches%28lang%28%3Fabstract%29%2C%27en%27%29%0D%0A%7D+LIMIT+2&format=application%2Fsparql-results%2Bjson&timeout=30000";
 
+
         var_dump($url);
 
         $response = self::curl($url);
@@ -215,6 +235,35 @@ class DefaultController extends Controller
         $lereturn = array($pageid, $extract);
 
         return $lereturn;
+    }
+
+    public static function getType($slug)
+    {
+
+     $url = "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=select+distinct+%3Ftype+where+%7B%0D%0A%0D%0A%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F".$slug."%3E%09%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23type%3E%09%3Ftype+.%0D%0A%0D%0A%7D+LIMIT+100&format=application%2Fsparql-results%2Bjson&CXML_redir_for_subjs=121&CXML_redir_for_hrefs=&timeout=30000&debug=on";
+
+     $response = self::curl($url);
+
+     $data = json_decode($response, true);
+
+     if(isset($data['results']['bindings'][0]['type']['value']))
+     {
+        $type= $data['results']['bindings'][0]['type']['value'];
+
+            if (($tmp = strstr($type, '#')) !== false) {
+                     $type = substr($tmp, 1);
+                     echo "<br>LE STR ".$type."<br>";
+            }              
+     }
+
+     else
+     {
+        $type = "Unknown";
+     }
+
+     
+    return $type;
+
     }
 
     
