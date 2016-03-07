@@ -21,8 +21,7 @@
       <div class="row center">
 
        <div class="col s6 left-align vertop">
-        <div data-wheelnav  data-wheelnav-wheelradius="200"
-        data-wheelnav-wheelcolor="fractallove" id="wheelDiv"></div>
+        <div  {# data-wheelnav-cssmode #} id="wheelDiv"></div>
       </div>
 
       <div class="col s6">
@@ -152,9 +151,11 @@
             var wheel = new wheelnav("wheelDiv");
 
             //This is the place for code snippets from the documentation -> http://wheelnavjs.softwaretailoring.net/documentation.html
-
+            wheel.colors = colorpalette.gamebookers;
+            wheel.wheelRadius = 160;
+            wheel.slicePathFunction = slicePath().DonutSlice;
             wheel.createWheel(categories);
-            wheel.navigateWheel(2);
+
 
             //Insert generated JavaScript code from here -> http://pmg.softwaretailoring.net
 
