@@ -41,6 +41,20 @@ class DefaultController extends Controller
         return $this->render('entity.html.twig');
     }
 
+    /**
+     * @Route("/getrevision/{revid}", name="getRevision")
+     */
+    public function getRevisionAction($revid)
+    {
+        $revid = $this->getDoctrine()
+        ->getRepository('AppBundle:Revision')
+        ->find($revid;
+
+        //$serializer = new Serializer($normalizers, $encoders);
+
+        return $this->render('search.html.twig');
+    }
+
 
         /**
      * @Route("/installdone", name="installed")

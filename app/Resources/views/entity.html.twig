@@ -8,6 +8,12 @@
 
    <script src="{{ asset('bundles/js/slider-timeline-init.js') }}"></script>
 
+     <script src="{{ asset('bundles/js/raphael.min.js') }}"></script>     
+
+    <script src="{{ asset('bundles/js/raphael.icons.min.js') }}"></script>     
+
+     <script src="{{ asset('bundles/js/wheelnav.min.js') }}"></script>
+
 
   <div class="section no-pad-bot  blue-grey lighten-5" id="index-banner">
 
@@ -15,7 +21,8 @@
       <div class="row center">
 
        <div class="col s6 left-align vertop">
-
+        <div data-wheelnav  data-wheelnav-wheelradius="200"
+        data-wheelnav-wheelcolor="fractallove" id="wheelDiv"></div>
       </div>
 
       <div class="col s6">
@@ -123,5 +130,23 @@
 </div>
 
 </div>
+
+    <script type="text/javascript">
+
+        window.onload = function () {
+
+            var wheel = new wheelnav("wheelDiv");
+
+            //This is the place for code snippets from the documentation -> http://wheelnavjs.softwaretailoring.net/documentation.html
+
+            wheel.createWheel(
+              ["Thank you", "for", "download", icon.fave,
+              "Thank you", "for", "download", "Thank you", "for", "download", "Thank you", "for", "download", "Thank you", "for", "download", "Thank you", "for", "download"]);
+            wheel.navigateWheel(2);
+
+            //Insert generated JavaScript code from here -> http://pmg.softwaretailoring.net
+        };
+
+    </script>
 
 {% endblock %}
