@@ -7,96 +7,42 @@
     <div class="container">
 
 
-      <div class="row center">
-        <div class="col s6">
-         <img class="responsive-img"  src="http://i2.cdn.turner.com/cnnnext/dam/assets/150213095929-27-obama-0213-super-169.jpg" />
-       </div>
-       <div class="col s6 left-align vertop">
-        <h2> Barack Obama</h2>
-        <h3>Person</h3>
-        <p class="flow-text">Barack Hussein Obama II, né le 4 août 1961 à Honolulu, est un homme d'État américain. Il est le 44ᵉ et actuel président des États-Unis, élu pour un premier mandat le 4 novembre 2008 et réélu le 6 novembre 2012. </p>
-      </div>
-    </div>
-
-
-
-
-    <div class="row page-featured-posts-grid-wrapper page-featured-posts-full-width">
-
-      <div class="col s6" style="opacity: 1;">
-        <article class="post-435 post type-post status-publish format-standard has-post-thumbnail hentry category-travel">
-          <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-209-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-209"> 
-{#           <header>
-          <a href="http://emerald.sekizgen.net/bicycle-tour/" class="page-featured-posts-grid-link-wrapper waves-effect">
-            <div class="page-featured-posts-grid-title-wrapper center-align">
-              <h2 class="page-featured-posts-grid-title"><strong>BICYCLE</strong> TOUR</h2>
-            </div>
-          </a>
-        </header> #}
-      </article>
-    </div>
-
     <div class="col s6">
 
-      <div class="col s6 min" style="opacity: 1;">
-        <article class="post-425 post type-post status-publish format-standard has-post-thumbnail hentry category-music">
-          <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-45-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-45">{#  <header>
-          <a href="http://emerald.sekizgen.net/cycling-songs/" class="page-featured-posts-grid-link-wrapper waves-effect">
-            <div class="page-featured-posts-grid-title-wrapper center-align">
-              <h2 class="page-featured-posts-grid-title"><strong>CYCLING</strong> SONGS</h2>
-            </div>
-          </a>
-        </header> #}
-      </article>
-    </div>
 
 
-    <div class="col s6 min" style="opacity: 1;">
-      <article class="post-340 post type-post status-publish format-standard has-post-thumbnail hentry category-lifestyle">
-        <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-219-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-219"> {# <header>
-        <a href="http://emerald.sekizgen.net/winter-tea/" class="page-featured-posts-grid-link-wrapper waves-effect">
-          <div class="page-featured-posts-grid-title-wrapper center-align">
-            <h2 class="page-featured-posts-grid-title">WINTER TEA</h2>
-          </div>
-        </a>
-      </header> #}
-    </article>
-  </div>
 
-
-  <div class="col s6 min3" style="opacity: 1;">
-    <article class="post-365 post type-post status-publish format-standard has-post-thumbnail hentry category-fashion">
-      <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-40-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-40"> 
-{#       <header>
-      <a href="http://emerald.sekizgen.net/cool-stuff-for-men/" class="page-featured-posts-grid-link-wrapper waves-effect">
-        <div class="page-featured-posts-grid-title-wrapper center-align">
-          <h2 class="page-featured-posts-grid-title"><strong>COOL</strong> STUFF FOR <em>MEN</em></h2>
-        </div>
-      </a>
-    </header> #}
-  </article>
+{# total items count #}
+<div class="count">
+    {{ pagination.getTotalItemCount }}  results
 </div>
+<table>
+<tr>
+{# sorting of properties based on query components #}
+    <th>Entity Id</th>
+    <th{% if pagination.isSorted('a.Title') %} class="sorted"{% endif %}>{{ knp_pagination_sortable(pagination, 'Title', 'a.title') }}</th>
+    <th>{{ knp_pagination_sortable(pagination, 'Description', ['a.date', 'a.time']) }}</th>
 
+</tr>
 
-<div class="col s6 min3" style="opacity: 1;">
-  <article class="post-31 post type-post status-publish format-standard has-post-thumbnail hentry category-travel tag-summer">
-    <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-34-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-34"> 
-{#     <header>
-    <a href="http://emerald.sekizgen.net/summer-is-coming/" class="page-featured-posts-grid-link-wrapper waves-effect">
-      <div class="page-featured-posts-grid-title-wrapper center-align">
-        <h2 class="page-featured-posts-grid-title"><stong>SUMMER <em>IS</em> COMING</stong></h2>
-      </div>
-    </a>
-  </header> #}
-</article>
-</div>
-
-</div>
+{# table body #}
+{% for entity in pagination %}
+<tr {% if loop.index is odd %}class="color"{% endif %}>
+  
+    <td><a href="/entity/{{ entity.idEntity }}">{{ entity.idEntity }}</a></td>
+    <td>{{ entity.title }}</td>
+    <td>{{ entity.description |slice(0, 100) ~ ' ...'}}</td>
+</tr>
+{% endfor %}
+</table>
+{# display navigation #}
+<div class="navigation">
+    {{ knp_pagination_render(pagination) }}
 </div>
 
 
 </div>
-
+</div>
 </div>
 
 {% endblock %}

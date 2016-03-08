@@ -25,11 +25,46 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/search", name="research")
+     * @Route("/search/", name="research")
      */
     public function entityAction(Request $request)
     {
-        return $this->render('search.html.twig');
+
+        
+        $tq=$request->query->get('query');
+        echo "LA QUERY <br>".$tq;
+        $entity = $this->getDoctrine()
+        ->getRepository('AppBundle:Entity')
+        ->findByTitle($tq);
+
+        //Si l'entité n'existe pas déjà, on la crée
+        if ($entity) {
+            echo "EXISTE DEJA";
+        return $this->render('entity-small.html.twig');
+        }
+
+        else
+        {
+        $em = $this->getDoctrine()->getManager();
+        $query = $em->getRepository("AppBundle:Entity")->createQueryBuilder('e')
+           ->where('e.title LIKE :title')
+           ->setParameter('title', $tq)
+           ->getQuery()
+           ->getResult();
+
+
+         $paginator  = $this->get('knp_paginator');
+        $pagination = $paginator->paginate(
+            $query, /* query NOT result */
+            $request->query->getInt('page', 1)/*page number*/,
+            2/*limit per page*/
+        );
+
+        var_dump($pagination);
+
+
+        return $this->render('search.html.twig', array('pagination' => $pagination));
+        }
     }
 
     /**
