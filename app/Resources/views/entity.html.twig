@@ -25,8 +25,8 @@
       </div>
 
       <div class="col s6">
-        <h2> Barack Obama</h2>
-         <img class="responsive-img"  src="http://i2.cdn.turner.com/cnnnext/dam/assets/150213095929-27-obama-0213-super-169.jpg" />
+        <h2> {{entity.title}}</h2>
+         <img class="responsive-img"  src="{{entity.imglink}}" />
       </div>
 
     </div>
@@ -104,15 +104,26 @@
 
 </div>
 
-
     <div class="menu">
       <div class="slider">
         <ul>
-          <li class="category active"><a href="#home">HOME</a></li>
+          <li class="category"></li>
+          {% for revision in revisions %}
+
+            {% if loop.first == true %}
+            <li class="category active"><a href="#home" revid={{revision.idRevision}}>{{revision.date |date('Y-m-d') }}</a></li>
+            
+            {% else %}
+            <li class="category"><a href="#home" revid={{revision.idRevision}}>{{revision.date |date('Y-m-d') }}</a></li>
+            {% endif %} 
+d
+          {% endfor %}
+
+{#           <li class="category active"><a href="#home">HOME</a></li>
           <li class="category"><a href="#searc">SEARCH</a></li>
           <li class="category"><a href="#about">ABOUT US</a></li>
           <li class="category"><a href="#contact">CONTACT US</a></li>
-          <li class="category"><a href="#contact">fdssfdfds US</a></li>
+          <li class="category"><a href="#contact">fdssfdfds US</a></li> #}
         </ul>
         <div class="bar">
           <div class="before"></div>
@@ -134,8 +145,20 @@
 
         window.onload = function () {
 
-          $.ajax({
-          url: '/api/getrevision/694977146',
+          first = $(".menu ul li.active a").first();
+          getWheel(first.attr("revid"));
+
+          $(".menu ul li a").click(function(e) {
+                e.preventDefault();
+                getWheel($(this).attr("revid"));
+                $(this).slideToPos();
+                $('html, body').animate({ scrollTop: $(this.hash).offset().top }, 400);
+              });
+        };
+
+        function getWheel(revid) {
+                    $.ajax({
+          url: '/api/getrevision/'+revid,
           type: "GET",
           dataType: 'json',
           success: function (data) {
@@ -150,20 +173,15 @@
 
             var wheel = new wheelnav("wheelDiv");
 
-            //This is the place for code snippets from the documentation -> http://wheelnavjs.softwaretailoring.net/documentation.html
             wheel.colors = colorpalette.gamebookers;
             wheel.wheelRadius = 160;
             wheel.slicePathFunction = slicePath().DonutSlice;
             wheel.createWheel(categories);
 
 
-            //Insert generated JavaScript code from here -> http://pmg.softwaretailoring.net
-
             }
          });
-
-    
-        };
+        }
 
     </script>
 

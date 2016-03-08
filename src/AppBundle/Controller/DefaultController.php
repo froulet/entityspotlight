@@ -32,7 +32,7 @@ class DefaultController extends Controller
 
         
         $tq=$request->query->get('query');
-        echo "LA QUERY <br>".$tq;
+        //echo "LA QUERY <br>".$tq;
         $entity = $this->getDoctrine()
         ->getRepository('AppBundle:Entity')
         ->findByTitle($tq);
@@ -40,7 +40,7 @@ class DefaultController extends Controller
         //Si l'entité n'existe pas déjà, on la crée
         if ($entity) {
             echo "EXISTE DEJA";
-        return $this->render('entity-small.html.twig');
+    return $this->render('entity-small.html.twig', array('entity' => $entity[0]));
         }
 
         else
@@ -48,7 +48,7 @@ class DefaultController extends Controller
         $em = $this->getDoctrine()->getManager();
         $query = $em->getRepository("AppBundle:Entity")->createQueryBuilder('e')
            ->where('e.title LIKE :title')
-           ->setParameter('title', $tq)
+           ->setParameter('title', '%'.$tq.'%')
            ->getQuery()
            ->getResult();
 
@@ -60,20 +60,32 @@ class DefaultController extends Controller
             2/*limit per page*/
         );
 
-        var_dump($pagination);
-
+        //var_dump($pagination);
 
         return $this->render('search.html.twig', array('pagination' => $pagination));
         }
     }
 
     /**
-     * @Route("/entity/selected", name="selectedentity")
+     * @Route("/entity/{entityid}", name="selectedentity")
      */
-    public function selectedEntityAction(Request $request)
+    public function selectedEntityAction(Request $request, $entityid)
     {
 
-        return $this->render('entity.html.twig');
+        $entity = $this->getDoctrine()
+        ->getRepository('AppBundle:Entity')
+        ->find($entityid);
+
+        $em = $this->getDoctrine()->getManager();
+        $revisions = $em->getRepository("AppBundle:Revision")->createQueryBuilder('r')
+           ->where('r.idEntity = :idEntity')
+           ->setParameter('idEntity', $entityid)
+           ->groupBy('r.idRevision')
+           ->getQuery()
+           ->getResult();
+
+
+        return $this->render('entity.html.twig', array("entity" => $entity, "revisions" => $revisions ));
     }
 
     /**
@@ -115,7 +127,10 @@ class DefaultController extends Controller
 
         list($pageid, $extract)=self::getDescription($slug);
 
-        $type=self::getType($slug);
+        $type = self::getType($slug);
+
+        $thumbnail = self::getThumbnail($slug);
+
 
         $entity = $this->getDoctrine()
         ->getRepository('AppBundle:Entity')
@@ -130,7 +145,7 @@ class DefaultController extends Controller
          $entity->setTitle($slug);
          $entity->setType($type);
          $entity->setDescription($extract);
-         $entity->setImglink("CUCK");
+         $entity->setImglink($thumbnail);
          $em = $this->getDoctrine()->getManager();
          $em->persist($entity);
          $em->flush();
@@ -153,16 +168,31 @@ class DefaultController extends Controller
             foreach ($value[2] as $key2 => $categorytitle) {
                 echo "<br>".$categorytitle;
 
-            // $revision = new Revision();
-            // $revision->setCategoryTitle($categorytitle);
-            // $revision->setidEntity($pageid);
-            // $revision->setidRevision($value[0]);
-            // $date = new \DateTime($value[1]);
-            // $revision->setDate($date);
-            // //$revision->setDate(null);
-            // $em = $this->getDoctrine()->getManager();
-            // $em->persist($revision);
-            // $em->flush();
+
+            $revision = $this->getDoctrine()
+        ->getRepository('AppBundle:Revision')
+        ->findBy(array('idRevision' => $value[0], 'categoryTitle' => $categorytitle ));
+
+                //Si l'entité n'existe pas déjà, on la crée
+            if (!$revision) {
+              echo "Nouvelle Révision";
+              $revision = new Revision();
+            }
+
+            else
+            {
+                $revision = $revision[0];
+            }
+
+            
+             $revision->setCategoryTitle($categorytitle);
+             $revision->setidEntity($pageid);
+             $revision->setidRevision($value[0]);
+             $date = new \DateTime($value[1]);
+             $revision->setDate($date);
+             $em = $this->getDoctrine()->getManager();
+             $em->persist($revision);
+             $em->flush();
 
             
 
@@ -315,7 +345,31 @@ class DefaultController extends Controller
 
     }
 
-    
+    public static function getThumbnail($slug)
+    {
+        $url = "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=prefix+dbpedia%3A+%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F%3E%0D%0Aprefix+dbpedia-owl%3A+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2F%3E%0D%0A%0D%0Aselect+%3Fthumbnail+where+%7B+%0D%0A++dbpedia%3A".$slug."+dbpedia-owl%3Athumbnail+%3Fthumbnail+.%0D%0A%7D&format=json&CXML_redir_for_subjs=121&CXML_redir_for_hrefs=&timeout=30000&debug=on";
+
+        var_dump($url);
+
+        $response = self::curl($url);
+
+     $data = json_decode($response, true);
+
+     if(isset($data['results']['bindings'][0]['thumbnail']['value']))
+     {
+        $thumbnail = $data['results']['bindings'][0]['thumbnail']['value'];
+        echo "LA THUMBNAIL : <br>".$thumbnail."<br>";
+     }
+     else
+     {
+        $thumbnail = "unknown";
+     }
+
+     return $thumbnail;
+
+    }
+
+
     public static function curl($url)
     {
                 // is curl installed?

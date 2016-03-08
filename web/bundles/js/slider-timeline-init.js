@@ -15,13 +15,7 @@
       })( jQuery );
 	 	  
 	 	$(".menu ul li.active a").slideToPos();     
-    $(".menu ul li a").click(function(e) {
-      e.preventDefault();
-      $(this).slideToPos();
-      $('html, body').animate({ scrollTop: $(this.hash).offset().top }, 400);
-    });
-    
-    
+ 
     // // Scroll Spy
     // $(window).scroll(function() {
     //   var top = $(window).scrollTop() + 100; // Take into account height of fixed menu
