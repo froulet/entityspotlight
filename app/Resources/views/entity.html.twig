@@ -8,9 +8,9 @@
 
    <script src="{{ asset('bundles/js/slider-timeline-init.js') }}"></script>
 
-     <script src="{{ asset('bundles/js/raphael.min.js') }}"></script>     
+     <script src="{{ asset('bundles/js/raphael.min.js') }}"></script>
 
-    <script src="{{ asset('bundles/js/raphael.icons.min.js') }}"></script>     
+    <script src="{{ asset('bundles/js/raphael.icons.min.js') }}"></script>
 
      <script src="{{ asset('bundles/js/wheelnav.min.js') }}"></script>
 
@@ -36,7 +36,7 @@
 
       <div class="col s6" style="opacity: 1;">
         <article class="post-435 post type-post status-publish format-standard has-post-thumbnail hentry category-travel">
-          <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-209-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-209"> 
+          <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-209-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-209">
 {#           <header>
           <a href="http://emerald.sekizgen.net/bicycle-tour/" class="page-featured-posts-grid-link-wrapper waves-effect">
             <div class="page-featured-posts-grid-title-wrapper center-align">
@@ -77,7 +77,7 @@
 
   <div class="col s6 min3" style="opacity: 1;">
     <article class="post-365 post type-post status-publish format-standard has-post-thumbnail hentry category-fashion">
-      <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-40-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-40"> 
+      <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-40-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-40">
 {#       <header>
       <a href="http://emerald.sekizgen.net/cool-stuff-for-men/" class="page-featured-posts-grid-link-wrapper waves-effect">
         <div class="page-featured-posts-grid-title-wrapper center-align">
@@ -91,7 +91,7 @@
 
 <div class="col s6 min3" style="opacity: 1;">
   <article class="post-31 post type-post status-publish format-standard has-post-thumbnail hentry category-travel tag-summer">
-    <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-34-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-34"> 
+    <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-34-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-34">
 {#     <header>
     <a href="http://emerald.sekizgen.net/summer-is-coming/" class="page-featured-posts-grid-link-wrapper waves-effect">
       <div class="page-featured-posts-grid-title-wrapper center-align">
@@ -112,11 +112,10 @@
 
             {% if loop.first == true %}
             <li class="category active"><a href="#home" revid={{revision.idRevision}}>{{revision.date |date('Y-m-d') }}</a></li>
-            
+
             {% else %}
             <li class="category"><a href="#home" revid={{revision.idRevision}}>{{revision.date |date('Y-m-d') }}</a></li>
-            {% endif %} 
-d
+            {% endif %}
           {% endfor %}
 
 {#           <li class="category active"><a href="#home">HOME</a></li>
@@ -146,7 +145,8 @@ d
         window.onload = function () {
 
           first = $(".menu ul li.active a").first();
-          getWheel(first.attr("revid"));
+          idEntity = {{entity.idEntity}};
+          getWheel(first.attr("revid"), idEntity);
 
           $(".menu ul li a").click(function(e) {
                 e.preventDefault();
@@ -156,7 +156,7 @@ d
               });
         };
 
-        function getWheel(revid) {
+        function getWheel(revid, idEntity) {
                     $.ajax({
           url: '/api/getrevision/'+revid,
           type: "GET",
@@ -177,6 +177,16 @@ d
             wheel.wheelRadius = 160;
             wheel.slicePathFunction = slicePath().DonutSlice;
             wheel.createWheel(categories);
+
+            wheel.navItems.forEach(function(entry) {
+              console.log(entry);
+              entry.navigateFunction = function () {
+                console.log(entry.title);
+                window.location.href = "/entity/"+idEntity+"/"+entry.title;
+              };
+          });
+
+
 
 
             }

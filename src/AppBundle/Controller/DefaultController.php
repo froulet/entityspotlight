@@ -30,7 +30,7 @@ class DefaultController extends Controller
     public function entityAction(Request $request)
     {
 
-        
+
         $tq=$request->query->get('query');
         //echo "LA QUERY <br>".$tq;
         $entity = $this->getDoctrine()
@@ -65,6 +65,32 @@ class DefaultController extends Controller
         return $this->render('search.html.twig', array('pagination' => $pagination));
         }
     }
+
+
+    /**
+     * @Route("/entity/{entityid}/{category}", name="getcategory")
+     */
+    public function getCategorysAction(Request $request, $entityid, $category)
+    {
+
+        $entity = $this->getDoctrine()
+        ->getRepository('AppBundle:Entity')
+        ->find($entityid);
+
+        $em = $this->getDoctrine()->getManager();
+        $revisions = $em->getRepository("AppBundle:Revision")->createQueryBuilder('r')
+           ->where('r.idEntity = :idEntity AND r.categoryTitle=:categoryTitle')
+           ->setParameter('idEntity', $entityid)
+           ->setParameter('categoryTitle', $category)
+           ->groupBy('r.idRevision')
+           ->getQuery()
+           ->getResult();
+
+           var_dump($revisions);
+
+        return $this->render('category.html.twig', array("entity" => $entity, "revisions" => $revisions, "category" => $category ));
+    }
+
 
     /**
      * @Route("/entity/{entityid}", name="selectedentity")
@@ -140,7 +166,7 @@ class DefaultController extends Controller
         if (!$entity) {
             $entity = new Entity();
         }
-         
+
          $entity->setIdEntity($pageid);
          $entity->setTitle($slug);
          $entity->setType($type);
@@ -149,7 +175,7 @@ class DefaultController extends Controller
          $em = $this->getDoctrine()->getManager();
          $em->persist($entity);
          $em->flush();
-            
+
 
         $continue = null;
         $revisions = array();
@@ -163,8 +189,8 @@ class DefaultController extends Controller
             echo "<br> <b> Changement le".$value[1]."<b>";
 
             //Créer une nouvelle révision ici
- 
-            // 
+
+            //
             foreach ($value[2] as $key2 => $categorytitle) {
                 echo "<br>".$categorytitle;
 
@@ -184,7 +210,7 @@ class DefaultController extends Controller
                 $revision = $revision[0];
             }
 
-            
+
              $revision->setCategoryTitle($categorytitle);
              $revision->setidEntity($pageid);
              $revision->setidRevision($value[0]);
@@ -194,7 +220,7 @@ class DefaultController extends Controller
              $em->persist($revision);
              $em->flush();
 
-            
+
 
             }
         }
@@ -204,17 +230,17 @@ class DefaultController extends Controller
                return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..'),
         ]);
-   
+
 }
 
 
-    public static function identical_values( $arrayA , $arrayB ) { 
+    public static function identical_values( $arrayA , $arrayB ) {
 
-        sort( $arrayA ); 
-        sort( $arrayB ); 
+        sort( $arrayA );
+        sort( $arrayB );
 
-        return $arrayA == $arrayB; 
-    } 
+        return $arrayA == $arrayB;
+    }
 
     public static function getRevisions($id, $continue, $revisions)
     {
@@ -228,7 +254,7 @@ class DefaultController extends Controller
            var_dump($url);
 
            $response = self::curl($url);
-           
+
 
            //$lastPosts = $serializer->deserialize($response, null, 'json');
            $data = json_decode($response, true);
@@ -255,7 +281,7 @@ class DefaultController extends Controller
                 //}
 
                if (preg_match_all($regex, $val["*"], $matches_out)) {
-                     
+
                      echo "<b>".$val['revid']." - ".date($val['timestamp'])."</b><br>";
 
                      foreach ($matches_out[0]as $key => $value) {
@@ -265,7 +291,7 @@ class DefaultController extends Controller
                          $newcategories[] = $str;
                          }
 
-                         
+
 
                          $tkey = self::endKey($revisions);
 
@@ -274,8 +300,8 @@ class DefaultController extends Controller
                     if (!empty($revisions)) {
                            $diff = array_diff($revisions[$tkey][2], $newcategories);
 
-                            if (sizeof($diff) > 0) 
-                         //if (!self::identical_values($revisions[$tkey][2], $newcategories)) 
+                            if (sizeof($diff) > 0)
+                         //if (!self::identical_values($revisions[$tkey][2], $newcategories))
                          {
                              echo "<br>CHANGEMENT ICI !!<br>";
                              $revisions[] = $rev;
@@ -285,8 +311,8 @@ class DefaultController extends Controller
                        else
                        {
                         $revisions[] = $rev;
-                       }                      
-                         
+                       }
+
                     }
                 }
 
@@ -332,7 +358,7 @@ class DefaultController extends Controller
             if (($tmp = strstr($type, '#')) !== false) {
                      $type = substr($tmp, 1);
                      echo "<br>LE STR ".$type."<br>";
-            }              
+            }
      }
 
      else
@@ -340,7 +366,7 @@ class DefaultController extends Controller
         $type = "Unknown";
      }
 
-     
+
     return $type;
 
     }
@@ -373,30 +399,30 @@ class DefaultController extends Controller
     public static function curl($url)
     {
                 // is curl installed?
-        if (!function_exists('curl_init')){ 
+        if (!function_exists('curl_init')){
               die('CURL is not installed!');
         }
-           
+
            // get curl handle
            $ch= curl_init();
 
            // set request url
-           curl_setopt($ch, 
-              CURLOPT_URL, 
+           curl_setopt($ch,
+              CURLOPT_URL,
               $url);
 
            // return response, don't print/echo
-           curl_setopt($ch, 
-              CURLOPT_RETURNTRANSFER, 
+           curl_setopt($ch,
+              CURLOPT_RETURNTRANSFER,
               true);
-         
+
            /*
            Here you find more options for curl:
            http://www.php.net/curl_setopt
-           */    
+           */
 
            $response = curl_exec($ch);
-           
+
 
            curl_close($ch);
            return $response;
