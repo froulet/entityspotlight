@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+
+      <!-- TimeSheet -->
+   <link href="{{ asset('bundles/css/timesheet.min.css') }}" type="text/css" rel="stylesheet" media="screen,projection"/>
+
+   <script src="{{ asset('bundles/js/timesheet.min.js') }}"></script>
+
+
+  <div class="section no-pad-bot  blue-grey lighten-5" id="index-banner">
+
+    <div class="container">
+      <div class="row center">
+
+
+      <div class="col s12" style="opacity: 1;">
+      <h2>{{category |replace({'_': " "}) }}</h2>
+        <div id="timesheet"></div>
+    </div>
+
+
+</div>
+
+
+
+
+</div>
+
+</div>
+
+    <script type="text/javascript">
+    new Timesheet('timesheet', 2013, 2016, [
+
+    {% for revision in revisions %}
+
+    ['{{revision.date|date('m/Y')}}', "{{revision.categoryTitle}}", 'lorem'],
+    {% endfor %}
+
+      ['2014', '09/2015', 'A freaking awesome time', 'lorem'],
+      ['06/2014', '09/2016', 'Some great memories', 'ipsum'],
+      ['2013', 'Had very bad luck'],
+      ['10/2013', '2015', 'At least had fun', 'dolor'],
+      ['02/2015', '05/2016', 'Enjoyed those times as well', 'ipsum'],
+      ['07/2015', '09/2016', 'Bad luck again', 'default'],
+      ['10/2015', '2016', 'For a long time nothing happened', 'dolor'],
+      ['01/2013', '05/2014', 'LOST Season #4', 'lorem'],
+      ['01/2013', '05/2014', 'LOST Season #4', 'lorem'],
+      ['02/2013', '05/2014', 'LOST Season #5', 'lorem'],
+      ['09/2013', '06/2014', 'FRINGE #1 & #2', 'ipsum']
+    ]);
+    </script>
+
+{% endblock %}

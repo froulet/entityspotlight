@@ -150,7 +150,7 @@
 
           $(".menu ul li a").click(function(e) {
                 e.preventDefault();
-                getWheel($(this).attr("revid"));
+                getWheel($(this).attr("revid"), idEntity);
                 $(this).slideToPos();
                 $('html, body').animate({ scrollTop: $(this.hash).offset().top }, 400);
               });
@@ -182,7 +182,7 @@
               console.log(entry);
               entry.navigateFunction = function () {
                 console.log(entry.title);
-                window.location.href = "/entity/"+idEntity+"/"+entry.title;
+                window.location.href = "/entity/"+idEntity+"/"+entry.title.replace(/ /g,"_");
               };
           });
 
