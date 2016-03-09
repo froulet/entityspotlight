@@ -24,8 +24,6 @@
 </div>
 
 
-
-
 </div>
 
 </div>
@@ -34,21 +32,15 @@
     new Timesheet('timesheet', 2013, 2016, [
 
     {% for revision in revisions %}
-
-    ['{{revision.date|date('m/Y')}}', "{{revision.categoryTitle}}", 'lorem'],
+      {% if revision.category_title == category %}
+      ['{{revision.date|date('m/Y')}}', "{{revision.category_title}}"],
+      {% else %}
+      ['{{revision.date|date('m/Y')}}', "{{revision.category_title}}", "ipsum"],
+      {% endif %}
     {% endfor %}
+    ['{{revisions|first.date|date('m/Y')}}', '{{revisions|last.date|date('m/Y')}}', "{{entity.title}}", "ipsum"],
 
-      ['2014', '09/2015', 'A freaking awesome time', 'lorem'],
-      ['06/2014', '09/2016', 'Some great memories', 'ipsum'],
-      ['2013', 'Had very bad luck'],
-      ['10/2013', '2015', 'At least had fun', 'dolor'],
-      ['02/2015', '05/2016', 'Enjoyed those times as well', 'ipsum'],
-      ['07/2015', '09/2016', 'Bad luck again', 'default'],
-      ['10/2015', '2016', 'For a long time nothing happened', 'dolor'],
-      ['01/2013', '05/2014', 'LOST Season #4', 'lorem'],
-      ['01/2013', '05/2014', 'LOST Season #4', 'lorem'],
-      ['02/2013', '05/2014', 'LOST Season #5', 'lorem'],
-      ['09/2013', '06/2014', 'FRINGE #1 & #2', 'ipsum']
+
     ]);
     </script>
 

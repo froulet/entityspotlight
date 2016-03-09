@@ -3,7 +3,7 @@ nav
 	height: 155px;
 }
 
-footer.page-footer 
+footer.page-footer
 {
 	margin-top: 0 !important;
 }
@@ -15,7 +15,7 @@ footer.page-footer
 
 .min img
 {
-	    
+
 }
 
 .min3 img
@@ -47,3 +47,7 @@ margin: 0 0 1.424rem 0;
 {
 	height: 40%;
 }
+
+.section.no-pad-bot {
+    min-height: 549px;
+	}
