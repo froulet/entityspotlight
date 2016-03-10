@@ -12,6 +12,9 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use AppBundle\Entity\Entity;
 use AppBundle\Entity\Revision;
+use AppBundle\Form\EntityImport;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class DefaultController extends Controller
 {
@@ -134,20 +137,54 @@ public function selectedEntityAction(Request $request, $entityid)
 }
 
 
-//Je ne sais pas si celle-ci est vraiment utile ...
 /**
-* @Route("/getrevision/{revid}", name="getRevision")
+* @Route("/add/", name="addentities")
 */
-// public function getRevisionAction($revid)
-// {
-//     $revid = $this->getDoctrine()
-//     ->getRepository('AppBundle:Revision')
-//     ->find($revid);
-//
-//     //$serializer = new Serializer($normalizers, $encoders);
-//
-//     return $this->render('search.html.twig');
-// }
+public function addEntitiesAction(Request $request)
+{
+
+   $data = array();
+    $form = $this->createFormBuilder($data, array(
+        'action' => "/add/",
+    ))
+    ->add('entitiesId', TextareaType::class, array(
+    'attr' => array('rows' => '10', 'class' => "textareaimport"),
+    ))
+    ->add('save', SubmitType::class)
+    ->getForm();
+
+
+    $form->handleRequest($request);
+
+    //If some data is submit
+    if ($form->isValid()) {
+        $data = $form->getData();
+        //We filter out number and special character
+        $output = preg_replace( '/[^A-Za-z\~\\s\|]/', '', $data['entitiesId']);
+        $parts = explode("\n", $output);
+        print_r($parts);
+
+
+        foreach ($parts as $key => $value) {
+            if($value != '')
+            {
+            $value = preg_replace( '/\\s/', '_', trim($value));
+            echo "<br>".$value;
+            self::getDeltas($value);
+            }
+            
+        }
+    } else {
+        echo 'no data submitted';
+    }
+
+
+
+
+  return $this->render('import.html.twig', array('form' => $form->createView()));
+}
+
+
 
 
 /**
@@ -244,6 +281,7 @@ public function getDeltas($slug)
 
 
     }
+
   }
 
   echo "<br>";
@@ -304,7 +342,8 @@ public static function getRevisions($id, $continue, $revisions)
     if (preg_match_all($regex, $val["*"], $matches_out)) {
 
       echo "<b>".$val['revid']." - ".date($val['timestamp'])."</b><br>";
-
+      flush();
+      
       foreach ($matches_out[0]as $key => $value) {
         $str = substr($value, 11, -2);
         $str = str_replace($healthy, $yummy, $str);
