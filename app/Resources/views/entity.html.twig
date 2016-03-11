@@ -164,18 +164,19 @@
           success: function (data) {
               console.log(data);
               var categories = [];
-              ;
-                for (var x = 0; x < data.length; x++) {
-
+            
+                for (var x = 0; x < data.length; x++) 
+                {
                 cat = data[x].categoryTitle.replace(/_/g, ' ');
                 categories.push(cat)
-            }
+                }
 
             var wheel = new wheelnav("wheelDiv");
 
             wheel.colors = colorpalette.gamebookers;
             wheel.wheelRadius = 160;
-            wheel.slicePathFunction = slicePath().DonutSlice;
+            wheel.cssMode = true;
+            wheel.slicePathFunction = slicePath().MenuSlice;
             wheel.createWheel(categories);
 
             wheel.navItems.forEach(function(entry) {

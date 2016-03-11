@@ -57,3 +57,43 @@ margin: 0 0 1.424rem 0;
 {
 	height: 10em;
 }
+
+
+
+[class|=wheelnav-wheelDiv-slice-basic] {
+    fill: #1572b6;
+    stroke: none;
+    font-family: Impact;
+}
+[class|=wheelnav-wheelDiv-slice-hover] {
+    fill: #33a9dc;
+    stroke: none;
+    cursor: pointer;
+}
+[class|=wheelnav-wheelDiv-slice-selected] {
+    fill: #33a9dc;
+    stroke: none;
+}
+
+[class|=wheelnav-wheelDiv-title] > tspan {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+[class|=wheelnav-wheelDiv-title-basic] > tspan {
+   opacity: 0.5;
+}
+
+[class|=wheelnav-wheelDiv-title-selected] > tspan {
+   opacity: 1;
+   font-size: 20px;
+}
+
+[class|=wheelnav-wheelDiv-title] {
+    fill: black;
+    cursor: pointer;
+    stroke: white;
+    stroke-width: 2;
+    stroke-opacity: 0.1;
+}
