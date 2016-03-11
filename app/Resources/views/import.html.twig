@@ -6,11 +6,18 @@
 
     <div class="container">
       <br><br>
-      <h1 class="header center orange-text">Welcome !</h1>
+      <h1 class="header center orange-text">Add New Entities</h1>
       <div class="row center">
+
+      {% for key, leimport in imported %}
+            {% if leimport == '1' %}
+            <p class="card-panel teal lighten-2" > {{key|replace({'_': " "})}} imported. </p>
+            {% else %}
+            <p class="card-panel red accent-4"> {{key|replace({'_': " "})}}  not imported. </p>
+            {% endif %}
+      {% endfor %}
+        <h6> One entity's name per line </h6>
         {{ form(form) }}
-        <h5 class="header col s12 light">A modern time-based entity framework built on Symfony</h5>
-        <img class="responsive-img" src="{{ asset('bundles/img/big-data-spur-development-semantic-web.jpg') }}" />
       </div>
 
 

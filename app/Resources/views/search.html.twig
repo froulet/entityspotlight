@@ -8,7 +8,10 @@
 
 
     <div class="col s6">
-
+      
+      {% if error != null %}
+      <p class="card-panel red accent-4"> {{error}}</p>
+      {% endif %}
 
 
 
@@ -30,7 +33,7 @@
 <tr {% if loop.index is odd %}class="color"{% endif %}>
   
     <td><a href="/entity/{{ entity.idEntity }}">{{ entity.idEntity }}</a></td>
-    <td>{{ entity.title }}</td>
+    <td>{{ entity.title|replace({'_': " "}) }}</td>
     <td>{{ entity.description |slice(0, 100) ~ ' ...'}}</td>
 </tr>
 {% endfor %}

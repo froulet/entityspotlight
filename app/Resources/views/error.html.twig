@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+  <div class="section no-pad-bot  blue-grey lighten-5" id="index-banner">
+
+    <div class="container">
+
+
+    <div class="col s6">
+      
+      {% if error != null %}
+      <p class="card-panel red accent-4"> {{error}}</p>
+      {% endif %}
+      
+</div>
+</div>
+</div>
+
+{% endblock %}

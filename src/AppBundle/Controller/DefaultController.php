@@ -15,6 +15,7 @@ use AppBundle\Entity\Revision;
 use AppBundle\Form\EntityImport;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class DefaultController extends Controller
 {
@@ -35,12 +36,20 @@ class DefaultController extends Controller
 
 
     $tq=$request->query->get('query');
+    $error = null;
+
+    if($tq == '')
+    {
+        //throw new NotFoundHttpException("Page not found");
+        $error = "Query is empty !";
+        return $this->render('error.html.twig', array('error'=>$error));
+    }
     //echo "LA QUERY <br>".$tq;
     $entity = $this->getDoctrine()
     ->getRepository('AppBundle:Entity')
     ->findByTitle($tq);
 
-    //Si l'entité n'existe pas déjà, on la crée
+    //Si l'entité existe déjà
     if ($entity) {
       echo "EXISTE DEJA";
       return $this->render('entity-small.html.twig', array('entity' => $entity[0]));
@@ -59,13 +68,11 @@ class DefaultController extends Controller
       $paginator  = $this->get('knp_paginator');
       $pagination = $paginator->paginate(
       $query, /* query NOT result */
-      $request->query->getInt('page', 1)/*page number*/,
-      2/*limit per page*/
-    );
+      $request->query->getInt('page', 1)/*page number*/, 10/*limit per page*/);
 
     //var_dump($pagination);
 
-    return $this->render('search.html.twig', array('pagination' => $pagination));
+    return $this->render('search.html.twig', array('pagination' => $pagination, 'error'=>$error));
   }
 }
 
@@ -147,7 +154,7 @@ public function addEntitiesAction(Request $request)
     $form = $this->createFormBuilder($data, array(
         'action' => "/add/",
     ))
-    ->add('entitiesId', TextareaType::class, array(
+    ->add('entitiesNames', TextareaType::class, array(
     'attr' => array('rows' => '10', 'class' => "textareaimport"),
     ))
     ->add('save', SubmitType::class)
@@ -160,28 +167,29 @@ public function addEntitiesAction(Request $request)
     if ($form->isValid()) {
         $data = $form->getData();
         //We filter out number and special character
-        $output = preg_replace( '/[^A-Za-z\~\\s\|]/', '', $data['entitiesId']);
-        $parts = explode("\n", $output);
+        $parts = explode("\n", $data['entitiesNames']);
         print_r($parts);
 
+        $imported = array();
 
         foreach ($parts as $key => $value) {
             if($value != '')
             {
-            $value = preg_replace( '/\\s/', '_', trim($value));
+            $output = preg_replace( '/[^A-Za-z\~\\s\|]/', '', $value);
+            $value = preg_replace( '/\\s/', '_', trim($output));
             echo "<br>".$value;
-            self::getDeltas($value);
+            $callback=self::getDeltas($value);
+            $imported[$value] = $callback;
             }
             
         }
     } else {
         echo 'no data submitted';
+        $imported = array();
     }
 
+  return $this->render('import.html.twig', array('form' => $form->createView(), 'imported' => $imported));
 
-
-
-  return $this->render('import.html.twig', array('form' => $form->createView()));
 }
 
 
@@ -211,84 +219,94 @@ public function getDeltas($slug)
 
   list($pageid, $extract)=self::getDescription($slug);
 
-  $type = self::getType($slug);
-
-  $thumbnail = self::getThumbnail($slug);
-
-
-  $entity = $this->getDoctrine()
-  ->getRepository('AppBundle:Entity')
-  ->find($pageid);
-
-  //Si l'entité n'existe pas déjà, on la crée
-  if (!$entity) {
-    $entity = new Entity();
+  if($pageid == null)
+  {
+    echo "<br><b>Entity ".$slug." not found.<b><br>";
+    return 0;
   }
 
-  $entity->setIdEntity($pageid);
-  $entity->setTitle($slug);
-  $entity->setType($type);
-  $entity->setDescription($extract);
-  $entity->setImglink($thumbnail);
-  $em = $this->getDoctrine()->getManager();
-  $em->persist($entity);
-  $em->flush();
-
-
-  $continue = null;
-  $revisions = array();
-
-  do{
-    list($revisions, $continue) = self::getRevisions($pageid, $continue, $revisions);
-  }
-  while($continue != null);
-
-  foreach ($revisions as $key => $value) {
-    echo "<br> <b> Changement le".$value[1]."<b>";
-
-    //Créer une nouvelle révision ici
-
-    //
-    foreach ($value[2] as $key2 => $categorytitle) {
-      echo "<br>".$categorytitle;
-
-
-      $revision = $this->getDoctrine()
-      ->getRepository('AppBundle:Revision')
-      ->findBy(array('idRevision' => $value[0], 'categoryTitle' => $categorytitle ));
-
-      //Si l'entité n'existe pas déjà, on la crée
-      if (!$revision) {
-        echo "Nouvelle Révision";
-        $revision = new Revision();
-      }
-
-      else
+  else
       {
-        $revision = $revision[0];
-      }
+          $type = self::getType($slug);
+
+          $thumbnail = self::getThumbnail($slug);
 
 
-      $revision->setCategoryTitle($categorytitle);
-      $revision->setidEntity($pageid);
-      $revision->setidRevision($value[0]);
-      $date = new \DateTime($value[1]);
-      $revision->setDate($date);
-      $em = $this->getDoctrine()->getManager();
-      $em->persist($revision);
-      $em->flush();
+          $entity = $this->getDoctrine()
+          ->getRepository('AppBundle:Entity')
+          ->find($pageid);
+
+          //Si l'entité n'existe pas déjà, on la crée
+          if (!$entity) {
+            $entity = new Entity();
+          }
+
+          $entity->setIdEntity($pageid);
+          $entity->setTitle($slug);
+          $entity->setType($type);
+          $entity->setDescription($extract);
+          $entity->setImglink($thumbnail);
+          $em = $this->getDoctrine()->getManager();
+          $em->persist($entity);
+          $em->flush();
+
+
+          $continue = null;
+          $revisions = array();
+
+          do{
+            list($revisions, $continue) = self::getRevisions($pageid, $continue, $revisions);
+          }
+          while($continue != null);
+
+          foreach ($revisions as $key => $value) {
+            echo "<br> <b> Changement le".$value[1]."<b>";
+
+            //Créer une nouvelle révision ici
+
+            //
+            foreach ($value[2] as $key2 => $categorytitle) {
+              echo "<br>".$categorytitle;
+
+
+              $revision = $this->getDoctrine()
+              ->getRepository('AppBundle:Revision')
+              ->findBy(array('idRevision' => $value[0], 'categoryTitle' => $categorytitle ));
+
+              //Si l'entité n'existe pas déjà, on la crée
+              if (!$revision) {
+                echo "Nouvelle Révision";
+                $revision = new Revision();
+              }
+
+              else
+              {
+                $revision = $revision[0];
+              }
+
+
+              $revision->setCategoryTitle($categorytitle);
+              $revision->setidEntity($pageid);
+              $revision->setidRevision($value[0]);
+              $date = new \DateTime($value[1]);
+              $revision->setDate($date);
+              $em = $this->getDoctrine()->getManager();
+              $em->persist($revision);
+              $em->flush();
 
 
 
+            }
+
+          }
+
+          echo "<br>";
+          return 1;
     }
 
-  }
-
-  echo "<br>";
-
-  return $this->render('default/index.html.twig', [
-    'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..'),
-  ]);
+  // return $this->render('default/index.html.twig', [
+  //   'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..'),
+  // ]);
 
 }
 
@@ -392,12 +410,22 @@ public static function getDescription($slug){
 
   $data = json_decode($response, true);
 
-  $pageid= $data['results']['bindings'][0]['id']['value'];
-  echo "<br><br>LE PAGE ID <br>".$pageid;
-  $extract= $data['results']['bindings'][0]['abstract']['value'];
-  echo "<br><br>LE EPIC EXTRACT <br>".$extract;
+  if(isset($data['results']['bindings'][0]['id']['value']))
+  {
+      $pageid= $data['results']['bindings'][0]['id']['value'];
+      echo "<br><br>LE PAGE ID <br>".$pageid;
+      $extract= $data['results']['bindings'][0]['abstract']['value'];
+      echo "<br><br>LE EPIC EXTRACT <br>".$extract;
+      $lereturn = array($pageid, $extract);
+  }
 
-  $lereturn = array($pageid, $extract);
+  else
+    {
+        $lereturn = array(null, null);
+    }
+
+
+  
 
   return $lereturn;
 }
