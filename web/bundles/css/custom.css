@@ -58,7 +58,16 @@ margin: 0 0 1.424rem 0;
 	height: 10em;
 }
 
+.count
+{
+	text-align: center;
+    font-size: 37px;
+}
 
+.titlesearch
+{
+	font-weight: bold;
+}
 
 [class|=wheelnav-wheelDiv-slice-basic] {
     fill: #1572b6;

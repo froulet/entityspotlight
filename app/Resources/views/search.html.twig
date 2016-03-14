@@ -33,7 +33,7 @@
 <tr {% if loop.index is odd %}class="color"{% endif %}>
   
     <td><a href="/entity/{{ entity.idEntity }}">{{ entity.idEntity }}</a></td>
-    <td>{{ entity.title|replace({'_': " "}) }}</td>
+    <td class='titlesearch'>{{ entity.title|replace({'_': " "}) }}</td>
     <td>{{ entity.description |slice(0, 100) ~ ' ...'}}</td>
 </tr>
 {% endfor %}
