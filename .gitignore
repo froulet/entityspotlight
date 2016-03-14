@@ -35,3 +35,6 @@
 
 # Composer PHAR
 /composer.phar
+
+/ext/listen-to-wikipedia-master/static/sounds/
+/ext/listen-to-wikipedia-master/conf/

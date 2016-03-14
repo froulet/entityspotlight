@@ -1,0 +1,51 @@
+<html>
+<body>
+</body>
+<script   src="https://code.jquery.com/jquery-2.2.1.min.js"   integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="   crossorigin="anonymous"></script>
+
+<div id="insertTest"></div>
+
+<script>
+
+function callWikipediaAPI(wikipediaPage, cont) {
+	// http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse
+	let url = 'http://en.wikipedia.org/w/api.php?action=query&format=json&callback=?';
+	if(cont != null)
+	{
+		url = url+"&rvcontinue="+cont;
+	}
+
+	console.table(url);
+
+    $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|content', uselang:'en', rvlimit:"50", rvstart:"20160101000000", rvend:"20130101000000", rvdir:"older"}, function( data ) {
+
+    	if (data['continue'] != null) {
+    		cont = data['continue']['rvcontinue'];
+		}
+		else
+		{
+		     cont = null;
+		}
+    	
+    	console.log(data['query']['pages']['2007']['revisions']);
+
+
+    	if(cont != null)
+    	{
+    		callWikipediaAPI(wikipediaPage, cont);
+    	}
+
+    	else
+    	{
+    		console.log('done');
+    	}
+
+});
+
+}
+callWikipediaAPI('2007', null);
+</script>
+
+
+
+</html>
