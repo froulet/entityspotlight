@@ -8,27 +8,30 @@ function wp_action(data, svg_area, silent) {
     } else {
         $('#edit_counter').html('You have seen a total of <span>' + insert_comma(total_edits) + ' edits</span>.');
     }
-    var now = new Date();
-    edit_times.push(now);
-    to_save = [];
-    if (edit_times.length > 1) {
-        for (var i = 0; i < edit_times.length + 1; i ++) {
-            var i_time = edit_times[i];
-            if (i_time) {
-                var i_time_diff = now.getTime() - i_time.getTime();
-                if (i_time_diff < 60000) {
-                    to_save.push(edit_times[i]);
-                }
-            }
-        }
-        edit_times = to_save;
-        var opacity = 1 / (100 / to_save.length);
-        if (opacity > 0.5) {
-            opacity = 0.5;
-        }
-        /*rate_bg.attr('opacity', opacity)*/
-        update_epm(to_save.length, svg_area);
-    }
+
+
+
+    // var now = new Date();
+    // edit_times.push(now);
+    // to_save = [];
+    // if (edit_times.length > 1) {
+    //     for (var i = 0; i < edit_times.length + 1; i ++) {
+    //         var i_time = edit_times[i];
+    //         if (i_time) {
+    //             var i_time_diff = now.getTime() - i_time.getTime();
+    //             if (i_time_diff < 60000) {
+    //                 to_save.push(edit_times[i]);
+    //             }
+    //         }
+    //     }
+    //     edit_times = to_save;
+    //     var opacity = 1 / (100 / to_save.length);
+    //     if (opacity > 0.5) {
+    //         opacity = 0.5;
+    //     }
+    //     /*rate_bg.attr('opacity', opacity)*/
+    //     update_epm(to_save.length, svg_area);
+    // }
 
 
 
@@ -37,9 +40,8 @@ function wp_action(data, svg_area, silent) {
     var csize = size;
     var no_label = false;
     var type;
-    //type ='bot';
+
     //console.log(data.user);
-    console.log(data);
 
     //White if Anon
     if (data.userid == 0) {
@@ -48,7 +50,6 @@ function wp_action(data, svg_area, silent) {
     } 
     else if (data.minor == '')
     {   
-        console.log('MINOR');
         type = 'minor';
     }
     //Purple if bot
@@ -144,8 +145,25 @@ function wp_action(data, svg_area, silent) {
         no_label = true;
     }
 
-    timediff(data.timestamp);
-    
+    if($('#timediff').is(':checked'))
+    {
+    timediff(data.timestamp, svg_area);
+    }
+    else
+    {
+        $(".x5").fadeOut(300, function(){$(this).remove();});
+    }
+
+
+    if(allrevisions.length > 1)
+    {
+        $('#nbleft').text(allrevisions.length +" left");
+    }
+    else
+    {
+        $('#nbleft').text("0"+" left");
+    }
+
 }
 
 
@@ -231,15 +249,29 @@ function newRev (data, svg_area) {
 
 
 
-function timediff(timestamp)
+function timediff(timestamp, svg)
 {
     var date1 = new Date(timestamp);
     if(cachedate != null)
     {  
     var date2 = cachedate;
     var timeDiff = Math.abs(date2.getTime() - date1.getTime());
-    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
-    $(".x5").fadeOut(function(){$(this).remove();});
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    if(diffDays > biggestinterval)
+    {
+        biggestinterval = diffDays;
+        update_bg_inverval(biggestinterval, svg);
+    }
+
+    edits ++;
+    averagediff += diffDays;
+
+    let average = (averagediff/edits).toFixed(2);;
+
+    update_avg(average, svg);
+
+    $(".x5").fadeOut(300, function(){$(this).remove();});
     $( "#timestampcontainer" ).append( "<span class='x5'> - "+diffDays+" day(s)</span>" );
     }
     cachedate = date1;
@@ -288,50 +320,6 @@ function play_random_swell() {
     swells[index].play();
 }
 
-function newuser_action(data, lid, svg_area) {
-    play_random_swell();
-    var messages = ['Welcome to ' + data.user + ', Wikipedia\'s newest user!',
-                    'Wikipedia has a new user, ' + data.user + '! Welcome!',
-                    'Welcome, ' + data.user + ' has joined Wikipedia!'];
-    var message = Math.round(Math.random() * (messages.length - 1));
-    var user_link = 'http://' + lid + '.wikipedia.org/w/index.php?title=User_talk:' + data.user + '&action=edit&section=new';
-    var user_group = svg_area.append('g');
-
-    var user_container = user_group.append('a')
-        .attr('xlink:href', user_link)
-        .attr('target', '_blank');
-
-    user_group.transition()
-        .delay(7000)
-        .remove();
-
-    user_container.transition()
-        .delay(4000)
-        .style('opacity', 0)
-        .duration(3000);
-
-    user_container.append('rect')
-        .attr('opacity', 0)
-        .transition()
-        .delay(100)
-        .duration(3000)
-        .attr('opacity', 1)
-        .attr('fill', newuser_box_color)
-        .attr('width', width)
-        .attr('height', 35);
-
-    var y = width / 2;
-
-    user_container.append('text')
-        .classed('newuser-label', true)
-        .attr('transform', 'translate(' + y +', 25)')
-        .transition()
-        .delay(1500)
-        .duration(1000)
-        .text(messages[message])
-        .attr('text-anchor', 'middle');
-
-}
 
 var return_hash_settings = function() {
     var hash_settings = window.location.hash.slice(1).split(',');
@@ -342,7 +330,6 @@ var return_hash_settings = function() {
     }
     return hash_settings;
 };
-
 
 
 var set_hash_settings = function (langs) {
@@ -434,35 +421,58 @@ function update_epm(epm, svg_area) {
     }
 }
 
-var tag_area = {},
-    tag_text = false,
-    tag_box = false;
 
-function update_tag_warning(svg_area) {
-    if (TAG_FILTERS.length == 0) {
-        if (!$.isEmptyObject(tag_area)) {
-            tag_area.remove();
-            tag_area = {}, tag_text = false;
-        }
-        return
-    }
-    if (!tag_text) {
-        tag_area = svg_area.append('g');
-        tag_box = tag_area.append('rect')
+var avg_text = false;
+var avg_container = {};
+
+function update_avg(avg, svg_area) {
+    if (!avg_text) {
+        avg_container = svg_area.append('g')
+            .attr('transform', 'translate(0, ' + (height - 25) + ')');
+
+        var avg_box = avg_container.append('rect')
             .attr('fill', newuser_box_color)
             .attr('opacity', 0.5)
+            .attr('width', 240)
             .attr('height', 25);
-        tag_text = tag_area.append('text')
+
+        avg_text = avg_container.append('text')
             .classed('newuser-label', true)
             .attr('transform', 'translate(5, 18)')
-            .style('font-size', '.8em');
+            .style('font-size', '.8em')
+            .text(avg + ' days between two edits per average');
+
+    } else if (avg_text.text) {
+        avg_text.text(avg + ' days between two edits per average');
     }
-    tag_area.attr('transform', 'translate(0, ' + (height - 50) + ')');
-    tag_text.text('Listening to: #' + TAG_FILTERS.join(', #'));
-    var tag_bbox = tag_text.node().getBBox();
-    tag_box.attr('width', tag_bbox.width + 10);
-    s_welcome = false;
 }
+
+var bg_inverval_text = false;
+var bg_inverval_container = {};
+
+function update_bg_inverval(bg_inverval, svg_area) {
+    if (!bg_inverval_text) {
+        bg_inverval_container = svg_area.append('g')
+            .attr('transform', 'translate(245, ' + (height - 25) + ')');
+
+        var bg_inverval_box = bg_inverval_container.append('rect')
+            .attr('fill', newuser_box_color)
+            .attr('opacity', 0.5)
+            .attr('width', 240)
+            .attr('height', 25);
+
+        bg_inverval_text = bg_inverval_container.append('text')
+            .classed('newuser-label', true)
+            .attr('transform', 'translate(5, 18)')
+            .style('font-size', '.8em')
+            .text('Biggest interval between two edits : '+bg_inverval);
+
+    } else if (bg_inverval_text.text) {
+        bg_inverval_text.text('Biggest interval between two edits : '+bg_inverval);
+    }
+}
+
+
 
 var insert_comma = function(s) {
     s = s.toFixed(0);
