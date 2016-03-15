@@ -76,9 +76,11 @@
         newuser_box_color = 'rgb(41, 128, 185)',
         bot_color = 'rgb(155, 89, 182)',
         anon_color = 'rgb(46, 204, 113)',
+        minor_color = 'rgb(20,255,200)',
         edit_color = '#fff',
         sound_totals = 51,
         total_edits = 0;
+        thetitle = '';
 
     /* Languages
        ========= */
@@ -264,7 +266,7 @@
 
             console.table(url);
 
-            $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|content', uselang:'en', rvlimit:"50", rvstart:"20160101000000", rvend:"20130101000000", rvdir:"older"}, function( data ) {
+            $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|size|user|userid|tags|flags', uselang:'en', rvlimit:"50", rvstart:"20160101000000", rvend:"20130101000000", rvdir:"older"}, function( data ) {
 
                 if (data['continue'] != null) {
                     cont = data['continue']['rvcontinue'];
@@ -274,8 +276,8 @@
                      cont = null;
                 }
                 
-                console.log(data['query']['pages']['2007']['revisions']);
-                revisions = data['query']['pages']['2007']['revisions'];
+                thetitle = data['query']['pages'][wikipediaPage]['title'];
+                revisions = data['query']['pages'][wikipediaPage]['revisions'];
                 
 
                  for (var i = 0; i < revisions.length; i++) {
@@ -302,7 +304,7 @@
 
         }
 
-        callWikipediaAPI('2007', null);
+        
 
         function myLoop(){
 
@@ -310,20 +312,22 @@
                 if(allrevisions.length > 0)
                 {
                 setTimeout(function () {
-                wp_action(allrevisions.shift(), svg);
+                newRev(allrevisions.shift(), svg);
                     timeout();
                 }, 400);
                 }
             }
 
             timeout();
-
-
         }
 
 
-
-
+        $( "#listen2" ).click(function() {
+              alert( "Handler for .click() called." );
+              var bla = $('#entityId').val();
+              console.log(bla);
+              callWikipediaAPI(bla, null);
+        });
 
 
 
@@ -396,6 +400,10 @@
     </div>
     <div id='area'></div>
     <div id='content'>
+    <b> Entity Id : </b>
+    <input type="text" id="entityId"> <br>
+    <input type="submit" id='listen2'> <br>
+
         <div class='bg'>
             <div id='rc-log-c'>
                 <h3>Recent changes</h3>
