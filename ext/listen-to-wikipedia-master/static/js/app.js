@@ -143,6 +143,9 @@ function wp_action(data, svg_area, silent) {
     } else {
         no_label = true;
     }
+
+    timediff(data.timestamp);
+    
 }
 
 
@@ -198,6 +201,10 @@ function newRev (data, svg_area) {
                         }
 
                         rc_str += ' <span class="lang">()</span>';
+
+                        let date = new Date(data.timestamp);
+                        rc_str += ' <span class="note">'+date+'</span>';
+
                         log_rc(rc_str, 20);
 
                         wp_action(data, svg_area);
@@ -224,7 +231,19 @@ function newRev (data, svg_area) {
 
 
 
-
+function timediff(timestamp)
+{
+    var date1 = new Date(timestamp);
+    if(cachedate != null)
+    {  
+    var date2 = cachedate;
+    var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+    var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+    $(".x5").fadeOut(function(){$(this).remove();});
+    $( "#timestampcontainer" ).append( "<span class='x5'> - "+diffDays+" day(s)</span>" );
+    }
+    cachedate = date1;
+}
 
 //Add a log
 var log_rc = function(rc_str, limit) {
@@ -324,17 +343,7 @@ var return_hash_settings = function() {
     return hash_settings;
 };
 
-var return_lang_settings = function() {
-    var enabled_hash = return_hash_settings();
-    enabled_langs = [];
-    for (var i = 0; i < enabled_hash.length +1; i ++) {
-        var setting = enabled_hash[i];
-        if (langs[setting]) {
-            enabled_langs.push(setting);
-        }
-    }
-    return enabled_langs;
-};
+
 
 var set_hash_settings = function (langs) {
     if (langs[0] === '') {

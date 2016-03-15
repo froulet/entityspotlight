@@ -7,11 +7,15 @@
     <meta name="author" content="Stephen LaPorte and Mahmoud Hashemi">
     <link rel="stylesheet" type="text/css" href="css/nouislider.custom.css">
     <link rel="stylesheet" type="text/css" href="css/jquery.tagsinput.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
+
     <script src="js/seedrandom.js" type="text/javascript"></script>
     <script src="js/jquery-1.9.1.min.js"></script>
     <script src="js/d3.min.js"></script>
     <script src="js/reconnecting-websocket.min.js" type="text/javascript"></script>
     <script src="js/app.js" type="text/javascript"></script>
+
+    <script src="js/jquery-ui.js"></script>
 
     <script src="js/jquery.nouislider.min.js"></script>
     <script src="js/howler.min.js"></script>
@@ -81,48 +85,8 @@
         sound_totals = 51,
         total_edits = 0;
         thetitle = '';
+        cachedate = null;
 
-    /* Languages
-       ========= */
-
-    var langs = {
-        'en': ['English', 'ws://wikimon.hatnote.com:9000'],
-        'de': ['German', 'ws://wikimon.hatnote.com:9010'],
-        'ru': ['Russian', 'ws://wikimon.hatnote.com:9020'],
-        'uk': ['Ukrainian', 'ws://wikimon.hatnote.com:9310'],
-        'ja': ['Japanese', 'ws://wikimon.hatnote.com:9030'],
-        'es': ['Spanish', 'ws://wikimon.hatnote.com:9040'],
-        'fr': ['French', 'ws://wikimon.hatnote.com:9050'],
-        'nl': ['Dutch', 'ws://wikimon.hatnote.com:9060'],
-        'it': ['Italian', 'ws://wikimon.hatnote.com:9070'],
-        'sv': ['Swedish', 'ws://wikimon.hatnote.com:9080'],
-        'ar': ['Arabic', 'ws://wikimon.hatnote.com:9090'],
-        'fa': ['Farsi', 'ws://wikimon.hatnote.com:9210'],
-        'he': ['Hebrew' , 'ws://wikimon.hatnote.com:9230'],
-        'id': ['Indonesian', 'ws://wikimon.hatnote.com:9100'],
-        'zh': ['Chinese', 'ws://wikimon.hatnote.com:9240'],
-        'as': ['Assamese', 'ws://wikimon.hatnote.com:9150'],
-        'hi': ['Hindi', 'ws://wikimon.hatnote.com:9140'],
-        'bn': ['Bengali', 'ws://wikimon.hatnote.com:9160'],
-        'pa': ['Punjabi', 'ws://wikimon.hatnote.com:9120'],
-        'te': ['Telugu', 'ws://wikimon.hatnote.com:9165'],
-        'ta': ['Tamil', 'ws://wikimon.hatnote.com:9110'],
-        'ml': ['Malayalam', 'ws://wikimon.hatnote.com:9250'],
-        'mr': ['Western Mari', 'ws://wikimon.hatnote.com:9130'],
-        'kn': ['Kannada', 'ws://wikimon.hatnote.com:9170'],
-        'or': ['Oriya', 'ws://wikimon.hatnote.com:9180'],
-        'sa': ['Sanskrit', 'ws://wikimon.hatnote.com:9190'],
-        'gu': ['Gujarati' , 'ws://wikimon.hatnote.com:9200'],
-        'pl': ['Polish' , 'ws://wikimon.hatnote.com:9260'],
-        'mk': ['Macedonian' , 'ws://wikimon.hatnote.com:9270'],
-        'be': ['Belarusian' , 'ws://wikimon.hatnote.com:9280'],
-        'sr': ['Serbian' , 'ws://wikimon.hatnote.com:9290'],
-        'bg': ['Bulgarian' , 'ws://wikimon.hatnote.com:9300'],
-        'hu': ['Hungarian', 'ws://wikimon.hatnote.com:9320'],
-        'fi': ['Finnish', 'ws://wikimon.hatnote.com:9330'],
-        'no': ['Norwegian', 'ws://wikimon.hatnote.com:9340'],
-        'wikidata': ['Wikidata' , 'ws://wikimon.hatnote.com:9220']
-    }
 
     /*
        ============== */
@@ -256,7 +220,7 @@
         var allrevisions = new Array();
         var quit = true;
 
-        function callWikipediaAPI(wikipediaPage, cont) {
+        function callWikipediaAPI(wikipediaPage, startDate, endDate, cont) {
 
             let url = 'http://en.wikipedia.org/w/api.php?action=query&format=json&callback=?';
             if(cont != null)
@@ -265,8 +229,8 @@
             }
 
             console.table(url);
-
-            $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|size|user|userid|tags|flags', uselang:'en', rvlimit:"50", rvstart:"20160101000000", rvend:"20130101000000", rvdir:"older"}, function( data ) {
+            console.log(endDate, startDate);
+            $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|size|user|userid|tags|flags', uselang:'en', rvlimit:"50", rvstart:endDate, rvend:startDate, rvdir:"older"}, function( data ) {
 
                 if (data['continue'] != null) {
                     cont = data['continue']['rvcontinue'];
@@ -292,7 +256,7 @@
             
                 if(cont != null)
                 {
-                    callWikipediaAPI(wikipediaPage, cont);
+                    callWikipediaAPI(wikipediaPage, startDate, endDate, cont);
                 }
 
                 else
@@ -322,33 +286,27 @@
         }
 
 
+          $(function() {
+            $( "#startDate, #endDate" ).datepicker({ dateFormat: "yymmdd" });
+          });
+
+
         $( "#listen2" ).click(function() {
-              alert( "Handler for .click() called." );
-              var bla = $('#entityId').val();
-              console.log(bla);
-              callWikipediaAPI(bla, null);
+
+              let entityId = $('#entityId').val();
+
+              let startDate = $('#startDate').val();
+              startDate = startDate + "000000";
+
+              let endDate = $('#endDate').val();
+              endDate = endDate + "000000";
+
+              console.log(entityId);
+              callWikipediaAPI(entityId, startDate, endDate, null);
         });
 
 
 
-
-        for (lang in langs) {
-            if (langs.hasOwnProperty(lang)) {
-                if (lang == 'wikidata') {
-                    $('#lang-boxes').append('<p><input type="checkbox" name="' + langs[lang][0] + '" id="' + lang + '-enable"/><label for="' + lang + '-enable">' + langs[lang][0] + ' <span class="conStatus" id="' + lang + '-status"></span></label></p>')
-                } else {
-                    $('#lang-boxes').append('<p><input type="checkbox" name="' + langs[lang][0] + '" id="' + lang + '-enable"/><label for="' + lang + '-enable">' + langs[lang][0] + ' Wikipedia <span class="conStatus" id="' + lang + '-status"></span></label></p>')
-                }
-                //SOCKETS[lang] = new wikipediaSocket.init(langs[lang][1], lang, svg);
-                var box = $('#' + lang + '-enable');
-                if (box.is(':checked')) {
-                    enable(lang)
-                }
-                box.click(make_click_handler(box, lang));
-            }
-        }
-
-        enabled_langs = return_lang_settings();
 
         // if (!enabled_langs.length) {
         //     enabled_langs.push(DEFAULT_LANG)
@@ -398,12 +356,16 @@
         </span><a id="about-link" href="">about</a> &amp; <a href="http://blog.hatnote.com/" target="_blank">blog</a> &amp; <a href="https://twitter.com/hatnotable" target="_blank">twitter</a> &amp; <a href="https://itunes.apple.com/us/app/listen-to-wikipedia/id832934300" target="_blank">app</a></span>
       <h1>Listen to Wikipedia</h1>
     </div>
-    <div id='area'></div>
+    <div id='area'>
+        <div id='timestampcontainer'></div>
+    </div>
     <div id='content'>
     <b> Entity Id : </b>
     <input type="text" id="entityId"> <br>
+    <br> 
+    Start date : <input type="text" id="startDate">
+    End date : <input type="text" id="endDate"><br>
     <input type="submit" id='listen2'> <br>
-
         <div class='bg'>
             <div id='rc-log-c'>
                 <h3>Recent changes</h3>
@@ -426,8 +388,6 @@
         <label for="hide_rc_box">Hide recent changes console</label></p>
         <p><input type="checkbox" name="background_mode" id="background_mode">
         <label for="background_mode">Hide graphics for background listening</label></p>
-        <h3>Languages</h3>
-        <div id='lang-boxes'> </div>
         <div class='clear'><br/></div>
         <h3>Tags</h3>
         <p>Listen for edits with a hashtag in the edit summary. Try it yourself! To do this, enter a hashtag below, then go make an edit and the same tag in the <a href="https://en.wikipedia.org/wiki/Help:Edit_summary">edit summary</a> of your article. If you have tags here, you will only hear edits with those tags.</p>
