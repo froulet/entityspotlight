@@ -1,4 +1,4 @@
-function wp_action(data, svg_area, silent) {
+function playRevision(data, svg_area, silent) {
     var silent = silent || false;
     if (!silent) {
         total_edits += 1;
@@ -10,31 +10,6 @@ function wp_action(data, svg_area, silent) {
     }
 
 
-
-    // var now = new Date();
-    // edit_times.push(now);
-    // to_save = [];
-    // if (edit_times.length > 1) {
-    //     for (var i = 0; i < edit_times.length + 1; i ++) {
-    //         var i_time = edit_times[i];
-    //         if (i_time) {
-    //             var i_time_diff = now.getTime() - i_time.getTime();
-    //             if (i_time_diff < 60000) {
-    //                 to_save.push(edit_times[i]);
-    //             }
-    //         }
-    //     }
-    //     edit_times = to_save;
-    //     var opacity = 1 / (100 / to_save.length);
-    //     if (opacity > 0.5) {
-    //         opacity = 0.5;
-    //     }
-    //     /*rate_bg.attr('opacity', opacity)*/
-    //     update_epm(to_save.length, svg_area);
-    // }
-
-
-
     var size = data.size / 1000;
     var label_text = data.timestamp;
     var csize = size;
@@ -43,15 +18,15 @@ function wp_action(data, svg_area, silent) {
 
     //console.log(data.user);
 
+    // if (data.minor == '')
+    // {   
+    //     type = 'minor';
+    // }
+
     //White if Anon
     if (data.userid == 0) {
          type = 'anon';
-    
     } 
-    else if (data.minor == '')
-    {   
-        type = 'minor';
-    }
     //Purple if bot
     else if (/bot/i.test(data.user)) {
         type = 'bot';
@@ -154,7 +129,6 @@ function wp_action(data, svg_area, silent) {
         $(".x5").fadeOut(300, function(){$(this).remove();});
     }
 
-
     if(allrevisions.length > 1)
     {
         $('#nbleft').text(allrevisions.length +" left");
@@ -225,25 +199,7 @@ function newRev (data, svg_area) {
 
                         log_rc(rc_str, 20);
 
-                        wp_action(data, svg_area);
-
-
-                    // } else if (!isNaN(data.change_size)) {
-                    //     wp_action(data, svg_area, true);
-                    // }
-
-                // } else if (data.page_title == 'Special:Log/newusers' &&
-                //            data.url != 'byemail' &&
-                //            s_welcome) {
-                //     if (user_announcements) {
-                //         newuser_action(data, lid, svg_area);
-                //     }
-                //     var nu_str = '<a href="http://' + lid + '.wikipedia.org/w/index.php?title=User_talk:' + data.user + '&action=edit&section=new">' + data.user + '</a>';
-                //     nu_str += ' joined ' + lid + ' Wikipedia! Welcome!';
-                //     log_rc(nu_str, 20);
-                // } 
-
-        
+                        playRevision(data, svg_area);        
 
     };
 
@@ -267,7 +223,7 @@ function timediff(timestamp, svg)
     edits ++;
     averagediff += diffDays;
 
-    let average = (averagediff/edits).toFixed(2);;
+    let average = (averagediff/edits).toFixed(2);
 
     update_avg(average, svg);
 
@@ -401,8 +357,7 @@ var epm_container = {};
 
 function update_epm(epm, svg_area) {
     if (!epm_text) {
-        epm_container = svg_area.append('g')
-            .attr('transform', 'translate(0, ' + (height - 25) + ')');
+        epm_container = getContainer(0);
 
         var epm_box = epm_container.append('rect')
             .attr('fill', newuser_box_color)
@@ -427,14 +382,9 @@ var avg_container = {};
 
 function update_avg(avg, svg_area) {
     if (!avg_text) {
-        avg_container = svg_area.append('g')
-            .attr('transform', 'translate(0, ' + (height - 25) + ')');
+        avg_container = getContainer(svg_area, 0);
 
-        var avg_box = avg_container.append('rect')
-            .attr('fill', newuser_box_color)
-            .attr('opacity', 0.5)
-            .attr('width', 240)
-            .attr('height', 25);
+        var avg_box = getBox(avg_container, newuser_box_color, 0.5, 240, 25);
 
         avg_text = avg_container.append('text')
             .classed('newuser-label', true)
@@ -447,19 +397,16 @@ function update_avg(avg, svg_area) {
     }
 }
 
+
 var bg_inverval_text = false;
 var bg_inverval_container = {};
 
 function update_bg_inverval(bg_inverval, svg_area) {
     if (!bg_inverval_text) {
-        bg_inverval_container = svg_area.append('g')
-            .attr('transform', 'translate(245, ' + (height - 25) + ')');
 
-        var bg_inverval_box = bg_inverval_container.append('rect')
-            .attr('fill', newuser_box_color)
-            .attr('opacity', 0.5)
-            .attr('width', 240)
-            .attr('height', 25);
+        bg_inverval_container = getContainer(svg_area, 245);
+
+        var bg_inverval_box = getBox(bg_inverval_container, newuser_box_color, 0.5, 240, 25);
 
         bg_inverval_text = bg_inverval_container.append('text')
             .classed('newuser-label', true)
@@ -470,6 +417,22 @@ function update_bg_inverval(bg_inverval, svg_area) {
     } else if (bg_inverval_text.text) {
         bg_inverval_text.text('Biggest interval between two edits : '+bg_inverval);
     }
+}
+
+
+function getContainer(svg_area, translateWidth)
+{
+ return svg_area.append('g').attr('transform', 'translate(' + translateWidth + ', ' + (height - 25) + ')');   
+}
+
+
+function getBox(container, fill, opacity, width, height)
+{
+ return container.append('rect')
+            .attr('fill', newuser_box_color)
+            .attr('opacity', opacity)
+            .attr('width', width)
+            .attr('height', height);   
 }
 
 

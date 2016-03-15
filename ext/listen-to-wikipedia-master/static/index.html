@@ -25,6 +25,9 @@
     var TAG_FILTERS = [];
     var DEBUG = false;
     $(function(){
+
+      /////////////// VOLUME FUNCTIONS ///////////////////
+      
       Howler.volume(global_volume * .01);
 
       $("#volumeControl").click(function() {
@@ -142,29 +145,12 @@
             if (epm_text) {
                 epm_container.attr('transform', 'translate(0, ' + (height - 25) + ')')
             }
-            update_tag_warning();
-            /*rate_bg.attr("width", width).attr("height", height);*/
+            //update_tag_warning();
+
         }
 
         window.onresize = update_window;
 
-        $('#welcome').click(make_click_handler($('#welcome'), 'nowelcomes')
-        );
-        $('#titles').click(
-            make_click_handler($('#titles'), 'notitles')
-        );
-        $('#background_mode').click(
-            function() {$("#area svg").toggle();}
-        );
-        $('#hide_rc_box').click(
-            function() {$("#rc-log").toggle();}
-        );
-
-        $('#about-link').click(function(){
-            // because we use window.location to set languages.
-            $('html, body').animate({scrollTop:$(document).height()}, 'slow');
-            return false;
-        });
 
         // TODO: Volume slider?
         var loaded_sounds = 0
@@ -214,13 +200,14 @@
         function callWikipediaAPI(wikipediaPage, startDate, endDate, cont) {
 
             let url = 'http://en.wikipedia.org/w/api.php?action=query&format=json&callback=?';
+
             if(cont != null)
             {
                 url = url+"&rvcontinue="+cont;
             }
 
             console.table(url);
-            console.log(endDate, startDate);
+
             $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|size|user|userid|tags|flags', uselang:'en', rvlimit:"50", rvstart:endDate, rvend:startDate, rvdir:"older"}, function( data ) {
 
                 if (data['continue'] != null) {
@@ -231,35 +218,40 @@
                      cont = null;
                 }
                 
-                thetitle = data['query']['pages'][wikipediaPage]['title'];
-                revisions = data['query']['pages'][wikipediaPage]['revisions'];
-                
-
-                 for (var i = 0; i < revisions.length; i++) {
-                    allrevisions.push(revisions[i]);
-                 }
+                extractData(data, wikipediaPage);
 
                 if(quit)
                 {
-                myLoop();
+                playAllRevisions();
                 quit = false;
                 }
             
                 if(cont != null)
                 {
                     callWikipediaAPI(wikipediaPage, startDate, endDate, cont);
+                    return;
                 }
 
-                else
-                {
-                    console.log('done');
-                }
+                console.log('done');
+
 
         });
 
         }
 
-        function myLoop(){
+
+        function extractData(data, wikipediaPage)
+        {
+            thetitle = data['query']['pages'][wikipediaPage]['title'];
+            revisions = data['query']['pages'][wikipediaPage]['revisions'];
+                
+            for (var i = 0; i < revisions.length; i++) {
+                allrevisions.push(revisions[i]);
+            }
+
+        }
+
+        function playAllRevisions(){
 
             function timeout() {
                 if(allrevisions.length > 0)
@@ -284,6 +276,8 @@
             timeout();
         }
 
+
+
           $(function() {
             $( "#startDate, #endDate" ).datepicker({ dateFormat: "yymmdd" });
             $( "#slider" ).slider({value:400,
@@ -297,47 +291,63 @@
           });
 
 
+    /* Listeners
+       ====== */
+
+        $( "#listen2" ).click(function() {
+
+              let entityId = $('#entityId').val();
+
+              let startDate = $('#startDate').val() + "000000";
+
+              let endDate = $('#endDate').val() + "000000";
+
+              callWikipediaAPI(entityId, startDate, endDate, null);
+        });
 
         $( "#stop" ).click(function() {
             allrevisions = Array();
             quit = true;
         });
 
-        $( "#listen2" ).click(function() {
+        $('#welcome').click(make_click_handler($('#welcome'), 'nowelcomes')
+        );
 
-              let entityId = $('#entityId').val();
+        $('#titles').click(
+            make_click_handler($('#titles'), 'notitles')
+        );
+        $('#background_mode').click(
+            function() {$("#area svg").toggle();}
+        );
+        $('#hide_rc_box').click(
+            function() {$("#rc-log").toggle();}
+        );
 
-              let startDate = $('#startDate').val();
-              startDate = startDate + "000000";
-
-              let endDate = $('#endDate').val();
-              endDate = endDate + "000000";
-
-              console.log(entityId);
-              callWikipediaAPI(entityId, startDate, endDate, null);
+        $('#about-link').click(function(){
+            // because we use window.location to set languages.
+            $('html, body').animate({scrollTop:$(document).height()}, 'slow');
+            return false;
         });
 
-
-        
-      $('#filter').tagsInput({
-        height: '45px',
-        width: '80%',
-        'delimiter': [' ', ','],
-        defaultText: 'Add a tag',
-        defaultTextWidth: 100,
-        unique: false,
-        onChange: function() {
-          TAG_FILTERS = [];
-          $('.tag span').each(function(val) {
-              var tag = $(this).text().trim().replace('#', '').toLowerCase();
-              if($.inArray(tag, TAG_FILTERS) === -1){
-                TAG_FILTERS.push(tag);
-              }
+        $('#filter').tagsInput({
+            height: '45px',
+            width: '80%',
+            'delimiter': [' ', ','],
+            defaultText: 'Add a tag',
+            defaultTextWidth: 100,
+            unique: false,
+            onChange: function() {
+              TAG_FILTERS = [];
+              $('.tag span').each(function(val) {
+                  var tag = $(this).text().trim().replace('#', '').toLowerCase();
+                  if($.inArray(tag, TAG_FILTERS) === -1){
+                    TAG_FILTERS.push(tag);
+                  }
+              });
+              //update_tag_warning(svg);
+              console.log('Watching for: ' + TAG_FILTERS)
+            }
           });
-          update_tag_warning(svg);
-          console.log('Watching for: ' + TAG_FILTERS)
-        }
-      });
 
     })
 
