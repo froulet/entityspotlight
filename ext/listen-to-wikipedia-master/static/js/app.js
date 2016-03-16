@@ -16,14 +16,12 @@ function playRevision(data, svg_area, silent) {
     var no_label = false;
     var type;
 
-    //console.log(data.user);
 
-    // if (data.minor == '')
-    // {   
-    //     type = 'minor';
+    // if (/\[\[Cat/.test(data['*'])) {
+    //     console.log('Cat présente');
     // }
 
-    //White if Anon
+
     if (data.userid == 0) {
          type = 'anon';
     } 

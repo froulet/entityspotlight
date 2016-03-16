@@ -208,7 +208,7 @@
 
             console.table(url);
 
-            $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|size|user|userid|tags|flags', uselang:'en', rvlimit:"50", rvstart:endDate, rvend:startDate, rvdir:"older"}, function( data ) {
+            $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|size|user|userid|tags|flags|content', uselang:'en', rvlimit:"50", rvstart:endDate, rvend:startDate, rvdir:"older"}, function( data ) {
 
                 if (data['continue'] != null) {
                     cont = data['continue']['rvcontinue'];
@@ -227,10 +227,13 @@
                 }
             
                 if(cont != null)
-                {
+                {   
+                    $('#stillloading').text(" (Still loading ...)");
                     callWikipediaAPI(wikipediaPage, startDate, endDate, cont);
                     return;
                 }
+
+                $('#stillloading').text("");
 
                 console.log('done');
 
@@ -377,7 +380,7 @@
     <br>
     <input type="checkbox" name="timediff" id="timediff"> Enable Time Difference<br>
     <div id="slider"></div><br>
-    <div id="state"><span id="nbleft"></span></div><br>
+    <div id="state"><span id="nbleft"></span><span id="stillloading"></span></div><br>
 
         <div class='bg'>
             <div id='rc-log-c'>
