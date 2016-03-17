@@ -1,0 +1,443 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+
+      <!-- Slider -->
+
+<link rel="stylesheet" type="text/css" href="{{ asset('bundles/css/jquery.tagsinput.css')}}">
+<link rel="stylesheet" type="text/css" href="{{ asset('bundles/css/jquery-ui.css') }}">
+<link href="{{ asset('bundles/css/l2wstyle.css') }}" rel='stylesheet' type='text/css'>
+
+    <script src="{{ asset('bundles/js/seedrandom.js')}}" type="text/javascript"></script>
+
+    <script src="{{ asset('bundles/js/d3.min.js')}}"></script>
+    <script src="{{ asset('bundles/js/app.js')}}" type="text/javascript"></script>
+
+    <script src="{{ asset('bundles/js/jquery-ui.js')}}"></script>
+
+    <script src="{{ asset('bundles/js/jquery.nouislider.min.js')}}"></script>
+    <script src="{{ asset('bundles/js/howler.min.js')}}"></script>
+    <script src="{{ asset('bundles/js/jquery.tagsinput.js')}}" type="text/javascript"></script>
+
+
+     <script>
+    var global_mute = false;
+    var global_volume = 50;
+    var TAG_FILTERS = [];
+    var DEBUG = false;
+    $(function(){
+
+      /////////////// VOLUME FUNCTIONS ///////////////////
+      
+      Howler.volume(global_volume * .01);
+
+      $("#volumeControl").click(function() {
+        if (!global_mute) {
+          global_mute = false;
+          Howler.mute();
+          $("#volumeControl").css("background-position", "0 0");
+        } else {
+          global_mute = false;
+          Howler.unmute();
+          $("#volumeControl").css("background-position", "0 -46px");
+        }
+      });
+
+      $("#volumeSlider").noUiSlider({
+        range : [-99, 0],
+        start : 0,
+        handles : 1,
+        step : 1,
+        orientation : "horizontal",
+        slide : function() {
+          global_volume = 100 + $(this).val();
+          var howler_volume = global_volume * 0.01;
+          if (howler_volume <= 0.01) {
+            Howler.mute();
+          } else {
+            Howler.unmute();
+            Howler.volume(global_volume * .01);
+          }
+      }});
+
+
+    });
+
+    /* Settings
+       ======== */
+
+    var scale_factor = 5,
+        note_overlap = 15,
+        note_timeout = 300,
+        current_notes = 0,
+        max_life = 60000;
+
+    /* Colors
+       ====== */
+
+    var body_background_color = '#f8f8f8',
+        body_text_color = '#000',
+        svg_background_color = '#1c2733',
+        svg_text_color = '#fff',
+        newuser_box_color = 'rgb(41, 128, 185)',
+        bot_color = 'rgb(155, 89, 182)',
+        anon_color = 'rgb(46, 204, 113)',
+        minor_color = 'rgb(20,255,200)',
+        edit_color = '#fff',
+        sound_totals = 51,
+        total_edits = 0;
+        thetitle = '';
+        cachedate = null;
+        averagediff = null;
+        edits = 0;
+        biggestinterval = 0;
+        speed = 400;
+        allrevisions = new Array();
+        quit = true;
+
+
+    /*
+       ============== */
+
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('#area svg')[0],
+        width = w.innerWidth || e.clientWidth || g.clientWidth;
+        height = (w.innerHeight  - $('#header').height())|| (e.clientHeight - $('#header').height()) || (g.clientHeight - $('#header').height());
+
+    var celesta = [],
+        clav = [],
+        epm = 0,
+        edit_times = [],
+        swells = [],
+        all_loaded = false,
+        s_titles = true,
+        s_welcome = true;
+
+    var user_announcements = false;
+    setTimeout(function() {
+        user_announcements = true;
+    }, 20000);
+
+    $(function(){
+
+
+        $('body').css('background-color', body_background_color)
+        $('body').css('color', body_text_color)
+        $('svg').css('background-color', svg_background_color)
+        $('svg text').css('color', svg_text_color)
+        // :(
+        $('head').append('<style type="text/css">.newuser-label {fill:' + svg_text_color +
+                         ';} .bot {fill:' + bot_color +
+                         ';} .anon {fill:' + anon_color +
+                         ';} .bot </style>');
+        $('body').append('<div id="loading"><p>Loading sound files ...</p></div>')
+
+        var svg = d3.select("#area").append("svg")
+            .attr({width: width, height: height})
+            .style('background-color', '#1c2733');
+
+        var update_window = function() {
+            width = w.innerWidth || e.clientWidth || g.clientWidth;
+            height = (w.innerHeight  - $('#header').height())|| (e.clientHeight - $('#header').height()) || (g.clientHeight - $('#header').height());
+
+            svg.attr("width", width).attr("height", height);
+            if (epm_text) {
+                epm_container.attr('transform', 'translate(0, ' + (height - 25) + ')')
+            }
+            //update_tag_warning();
+
+        }
+
+        window.onresize = update_window;
+
+
+        // TODO: Volume slider?
+        var loaded_sounds = 0
+        var sound_load = function(r) {
+            loaded_sounds += 1
+            if (loaded_sounds == sound_totals) {
+                all_loaded = true
+                $('#loading').remove()
+                console.log('Loading complete')
+            } else {
+                // console.log('Loading : ' + loaded_sounds + ' files out of ' + sound_totals)
+            }
+        }
+
+        // load celesta and clav sounds
+        for (var i = 1; i <= 24; i++) {
+            if (i > 9) {
+                fn = 'c0' + i;
+            } else {
+                fn = 'c00' + i;
+            }
+            celesta.push(new Howl({
+
+
+                urls : ['{{ asset('bundles/sounds') }}/celesta/' + fn + '.ogg',
+                        '{{ asset('bundles/sounds') }}/celesta/' + fn + '.mp3'],
+                volume : 0.2,
+                onload : sound_load(),
+            }))
+            clav.push(new Howl({
+                urls : ['{{ asset('bundles/sounds') }}/clav/' + fn + '.ogg',
+                        '{{ asset('bundles/sounds') }}/clav/' + fn + '.mp3'],
+                volume : 0.2,
+                onload : sound_load(),
+            }))
+        }
+
+        // load swell sounds
+        for (var i = 1; i <= 3; i++) {
+            swells.push(new Howl({
+                urls : ['{{ asset('bundles/sounds') }}/swells/swell' + i + '.ogg',
+                        '{{ asset('bundles/sounds') }}/swells/swell' + i + '.mp3'],
+                volume : 1,
+                onload : sound_load(),
+            }))
+        }
+
+        
+        function callWikipediaAPI(wikipediaPage, startDate, endDate, cont) {
+
+            wikipediaPage = '2007';
+
+            // if(cont != null)
+            // {
+            //     url = url+"&rvcontinue="+cont;
+            // }
+
+
+            $.getJSON("/api/querywiki", function( data ) {
+              console.log("YUUUUUP");
+
+              if (data['continue']['continue']!= null) {
+                     cont = data['continue']['continue'];
+                 }
+                 else
+                 {
+                      cont = null;
+                 }
+
+                 extractData(data, wikipediaPage);
+                 if(quit)
+                {
+                 playAllRevisions();
+                 quit = false;
+                }
+
+                });
+
+            // $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|size|user|userid|tags|flags|content', uselang:'en', rvlimit:"50", rvstart:endDate, rvend:startDate, rvdir:"older"}, function( data ) {
+
+    
+            //     if (data['continue'] != null) {
+            //         cont = data['continue']['rvcontinue'];
+            //     }
+            //     else
+            //     {
+            //          cont = null;
+            //     }
+                
+            //     extractData(data, wikipediaPage);
+
+            //     if(quit)
+            //     {
+            //     playAllRevisions();
+            //     quit = false;
+            //     }
+            
+            //     if(cont != null)
+            //     {   
+            //         $('#stillloading').text(" (Still loading ...)");
+            //         callWikipediaAPI(wikipediaPage, startDate, endDate, cont);
+            //         return;
+            //     }
+
+            //     $('#stillloading').text("");
+
+            //     console.log('done');
+
+
+            //  });
+
+        }
+
+
+        function extractData(data, wikipediaPage)
+        {
+            thetitle = '';
+            revisions = data['revisions'];
+                
+            for (var i = 0; i < revisions.length; i++) {
+                allrevisions.push(revisions[i]);
+            }
+
+        }
+
+        function playAllRevisions(){
+
+            function timeout() {
+                if(allrevisions.length > 0)
+                {
+                    if(speed >0 )
+                    {
+                    setTimeout(function () {
+                    newRev(allrevisions.pop(), svg);
+                        timeout();
+                    }, speed);
+                    }
+
+                    else
+                    {   
+                       newRev(allrevisions.pop(), svg);
+                       timeout();
+                    }
+
+                }
+            }
+
+            timeout();
+        }
+
+
+
+          $(function() {
+            $( "#startDate, #endDate" ).datepicker({ dateFormat: "yymmdd" });
+            $( "#slider" ).slider({value:400,
+                       min: 0,
+                       max: 600,
+                       step: 1,
+                       slide: function( event, ui ) {
+                            speed = $( "#slider" ).slider( "value" );
+                        }
+            });
+          });
+
+
+    /* Listeners
+       ====== */
+
+        $( "#listen2" ).click(function() {
+
+              let entityId = $('#entityId').val();
+
+              let startDate = $('#startDate').val() + "000000";
+
+              let endDate = $('#endDate').val() + "000000";
+
+              callWikipediaAPI(entityId, startDate, endDate, null);
+        });
+
+        $( "#stop" ).click(function() {
+            allrevisions = Array();
+            quit = true;
+        });
+
+        $('#welcome').click(make_click_handler($('#welcome'), 'nowelcomes')
+        );
+
+        $('#titles').click(
+            make_click_handler($('#titles'), 'notitles')
+        );
+        $('#background_mode').click(
+            function() {$("#area svg").toggle();}
+        );
+        $('#hide_rc_box').click(
+            function() {$("#rc-log").toggle();}
+        );
+
+        $('#about-link').click(function(){
+            // because we use window.location to set languages.
+            $('html, body').animate({scrollTop:$(document).height()}, 'slow');
+            return false;
+        });
+
+        $('#filter').tagsInput({
+            height: '45px',
+            width: '80%',
+            'delimiter': [' ', ','],
+            defaultText: 'Add a tag',
+            defaultTextWidth: 100,
+            unique: false,
+            onChange: function() {
+              TAG_FILTERS = [];
+              $('.tag span').each(function(val) {
+                  var tag = $(this).text().trim().replace('#', '').toLowerCase();
+                  if($.inArray(tag, TAG_FILTERS) === -1){
+                    TAG_FILTERS.push(tag);
+                  }
+              });
+              //update_tag_warning(svg);
+              console.log('Watching for: ' + TAG_FILTERS)
+            }
+          });
+
+    })
+
+
+    </script>
+
+
+
+
+
+  <div class=" no-pad-bot  blue-grey lighten-5" id="index-banner">
+
+    <div id='area'>
+              <div id='timestampcontainer'></div>
+    </div>
+
+
+    <div class="container">
+      <div id='content'>
+      <div class="row">
+
+          <div class="col s6 offset-s3">
+            <b> Entity Id : </b>
+            <input type="text" id="entityId" value='2007'> <br>
+            <br> 
+            Start date : <input type="text" id="startDate" value='20120101'>
+            End date : <input type="text" id="endDate" value='20160101'><br>
+            <input type="submit" id='listen2' value='play'> 
+            <input type="submit" id='stop' value='stop'>
+            <br>
+            <input type="checkbox" name="timediff" id="timediff"> Enable Time Difference<br>
+            <div id="slider"></div><br>
+         </div>
+      </div>
+
+         <div class="row center">
+          <div id="state"><span id="nbleft"></span><span id="stillloading"></span></div><br>
+
+              <div class='bg'>
+                  <div id='rc-log-c'>
+                      <h3>Recent changes</h3>
+                      <ul id='rc-log'>
+                      </ul>
+                       <div class="note">
+                        <p id="edit_counter"></p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+      </div>
+      </div>
+          
+
+
+    
+
+
+
+
+</div>
+
+</div>
+
+
+{% endblock %}

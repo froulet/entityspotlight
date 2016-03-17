@@ -76,6 +76,16 @@ class DefaultController extends Controller
   }
 }
 
+  /**
+  * @Route("/listentowikipedia", name="listentowikipedia")
+  */
+  public function l2w(Request $request)
+  {
+    // replace this example code with whatever you need
+    return $this->render('l2w.html.twig');
+  }
+
+
 
 /**
 * @Route("/entity/{entityid}/{category}", name="getcategory")
@@ -125,11 +135,16 @@ return $this->render('category.html.twig', array("entity" => $entity, "revisions
 public function selectedEntityAction(Request $request, $entityid)
 {
 
+  //get the entity
   $entity = $this->getDoctrine()
   ->getRepository('AppBundle:Entity')
   ->find($entityid);
 
+  ///////Get all of its revisions///////
+
+  //Only select date and id fields
   $fields = array('r.date', 'r.idRevision');
+
   $em = $this->getDoctrine()->getManager();
   $revisions = $em->getRepository("AppBundle:Revision")->createQueryBuilder('r')
   ->select($fields)
@@ -151,6 +166,9 @@ public function addEntitiesAction(Request $request)
 {
 
    $data = array();
+   ///////Create initial form///////
+    
+    //Set the action attribute
     $form = $this->createFormBuilder($data, array(
         'action' => "/add/",
     ))
@@ -172,6 +190,7 @@ public function addEntitiesAction(Request $request)
 
         $imported = array();
 
+        //Clean, trim, and execute import each entity
         foreach ($parts as $key => $value) {
             if($value != '')
             {
@@ -179,6 +198,8 @@ public function addEntitiesAction(Request $request)
             $value = preg_replace( '/\\s/', '_', trim($output));
             echo "<br>".$value;
             $callback=self::getDeltas($value);
+
+            //Stock the result (if import has succeeded or failed) in an array
             $imported[$value] = $callback;
             }
             
@@ -191,8 +212,6 @@ public function addEntitiesAction(Request $request)
   return $this->render('import.html.twig', array('form' => $form->createView(), 'imported' => $imported));
 
 }
-
-
 
 
 /**
@@ -295,7 +314,6 @@ public function getDeltas($slug)
               $em->flush();
 
 
-
             }
 
           }
@@ -304,19 +322,6 @@ public function getDeltas($slug)
           return 1;
     }
 
-  // return $this->render('default/index.html.twig', [
-  //   'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..'),
-  // ]);
-
-}
-
-
-public static function identical_values( $arrayA , $arrayB ) {
-
-  sort( $arrayA );
-  sort( $arrayB );
-
-  return $arrayA == $arrayB;
 }
 
 public static function getRevisions($id, $continue, $revisions)
@@ -341,7 +346,7 @@ public static function getRevisions($id, $continue, $revisions)
   $key = key($data["query"]["pages"]);
 
 
-  $continue = (isset($data["continue"]["rvcontinue"])) ? $data["continue"]["rvcontinue"] : null;
+  $continue = self::checkContinue($data);
 
   $categories = array();
   $healthy = array("| ", "|", " ");
@@ -370,7 +375,6 @@ public static function getRevisions($id, $continue, $revisions)
       }
 
 
-
       $tkey = self::endKey($revisions);
 
       $rev = [$val['revid'], $val['timestamp'], $newcategories];
@@ -379,7 +383,6 @@ public static function getRevisions($id, $continue, $revisions)
         $diff = array_diff($revisions[$tkey][2], $newcategories);
 
         if (sizeof($diff) > 0)
-        //if (!self::identical_values($revisions[$tkey][2], $newcategories))
         {
           echo "<br>CHANGEMENT ICI !!<br>";
           $revisions[] = $rev;
@@ -398,6 +401,65 @@ public static function getRevisions($id, $continue, $revisions)
   $lereturn = array($revisions, $continue);
   return $lereturn;
 }
+
+
+
+
+// Se servir de ces fonctions
+public static function getCategories($revision)
+{   
+
+  $healthy = array("| ", "|", " ");
+  $yummy   = array("", "","_");
+  $regex = "/\[\[Category:[^?*-@#]*?\]\]/";
+
+ $newcategories = array();
+
+    if (preg_match_all($regex, $revision["*"], $matches_out)) {
+
+      foreach ($matches_out[0]as $key => $value) {
+        $str = substr($value, 11, -2);
+        $str = str_replace($healthy, $yummy, $str);
+        //echo $str."<br>";
+        $newcategories[] = $str;
+      }
+
+    $revision['categories'] = $newcategories;
+    unset($revision['*']);
+
+    }
+
+  return $revision;
+
+}
+
+public static function get1Revisions($data)
+{   
+
+    reset($data);
+    $key = key($data);
+
+    $revision = array();
+
+      foreach ($data[$key]["revisions"] as $key => $val) {
+        $revisions[] = self::getCategories($val);
+      }
+      return $revisions;
+
+}
+
+
+public static function checkContinue($data)
+{
+    (isset($data["continue"]["rvcontinue"])) ? $cont = $data["continue"]["rvcontinue"] : $cont = null;
+
+    return $cont;
+}
+
+
+
+
+
 
 
 public static function getDescription($slug){
