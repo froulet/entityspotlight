@@ -203,15 +203,15 @@
         
         function callWikipediaAPI(wikipediaPage, startDate, endDate, cont) {
 
-            wikipediaPage = '2007';
 
-            // if(cont != null)
-            // {
-            //     url = url+"&rvcontinue="+cont;
-            // }
+             if(cont == null)
+             {
+                 cont = 'n';
+             }
 
+             url = "/api/querywiki/"+wikipediaPage+"/"+endDate+"-"+startDate+"/"+cont;
 
-            $.getJSON("/api/querywiki", function( data ) {
+            $.getJSON(url, function( data ) {
               console.log("YUUUUUP");
 
               if (data['continue']['continue']!= null) {
@@ -229,40 +229,18 @@
                  quit = false;
                 }
 
+                if(cont != null)
+                {   
+                    $('#stillloading').text(" (Still loading ...)");
+                     callWikipediaAPI(wikipediaPage, startDate, endDate, cont);
+                     return;
+                 }
+
+                 $('#stillloading').text("");
+
+                 console.log('done');
+
                 });
-
-            // $.getJSON(url, {pageids:wikipediaPage, prop:'revisions', rvprop:'ids|timestamp|size|user|userid|tags|flags|content', uselang:'en', rvlimit:"50", rvstart:endDate, rvend:startDate, rvdir:"older"}, function( data ) {
-
-    
-            //     if (data['continue'] != null) {
-            //         cont = data['continue']['rvcontinue'];
-            //     }
-            //     else
-            //     {
-            //          cont = null;
-            //     }
-                
-            //     extractData(data, wikipediaPage);
-
-            //     if(quit)
-            //     {
-            //     playAllRevisions();
-            //     quit = false;
-            //     }
-            
-            //     if(cont != null)
-            //     {   
-            //         $('#stillloading').text(" (Still loading ...)");
-            //         callWikipediaAPI(wikipediaPage, startDate, endDate, cont);
-            //         return;
-            //     }
-
-            //     $('#stillloading').text("");
-
-            //     console.log('done');
-
-
-            //  });
 
         }
 

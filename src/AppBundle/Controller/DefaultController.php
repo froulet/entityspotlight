@@ -457,7 +457,15 @@ public static function checkContinue($data)
 }
 
 
+public static function addContinue($continue, $url)
+{
+  if($continue != null && $continue != 'n')
+  {
+    $url = $url."&rvcontinue=".$continue;
+  }
 
+  return $url;
+}
 
 
 

@@ -63,16 +63,23 @@ class ApiController extends Controller
     }
 
         /**
-     * @Route("/querywiki/", name="querywiki")
+     * @Route("/querywiki/{entityid}/{period}/{continue}", name="querywiki")
      */
-    public function querywiki()
+    public function querywiki($entityid, $period, $continue)
     {   
 
         $encoders = array(new XmlEncoder(), new JsonEncoder());
         $normalizers = array(new ObjectNormalizer());
         $serializer = new Serializer($normalizers, $encoders);
 
-         $url = "https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=ids%7Ctimestamp%7Ccontent%7Csize&format=json&pageids=2007&rvlimit=50&rvstart=20160101000000&rvend=20130101000000&rvdir=older";
+         $dates = explode("-", $period);
+         $start = $dates[0]; //end, if &rvdir=older
+         $end = $dates[1];  //start, if &rvdir=older 
+
+
+         $url = "https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=ids%7Ctimestamp%7Cuser%7Cuserid%7Ctags%7Cflags%7Ccontent%7Csize&format=json&pageids=".$entityid."&rvlimit=50&rvstart=".$start."&rvend=".$end."&rvdir=older";
+
+         $url = DefaultController::addContinue($continue, $url);
 
          $response = DefaultController::curl($url);
          $data = json_decode($response, true);
