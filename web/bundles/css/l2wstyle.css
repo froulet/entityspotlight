@@ -48,9 +48,12 @@ label {
     font-size: 2em;
 }
 #rc-log {
-    list-style-type: none;
-    height: 400px;
-    overflow: hidden;
+  list-style-type: none;
+  height: 400px;
+  overflow: hidden;
+  width: 100%;
+  text-align: center;
+  margin-left: 2%;
 }
 .note {
     margin: 0;
@@ -92,6 +95,7 @@ label {
     background: #fff;
     border-radius: 3px;
     margin: 1em;
+    height: 520px;
 }
 .article-label {
     font: 1.0em sans-serif;
@@ -201,7 +205,7 @@ label {
     -webkit-transform: scale(0.8);
     -moz-transform: scale(0.8);
     transform: scale(0.8);
-    opacity: 0.8; 
+    opacity: 0.8;
     -webkit-animation: moveclouds 7s linear infinite, sideWays 1s ease-in-out infinite alternate;
     -moz-animation: moveclouds 7s linear infinite, sideWays 1s ease-in-out infinite alternate;
     -o-animation: moveclouds 7s linear infinite, sideWays 1s ease-in-out infinite alternate;
@@ -214,30 +218,30 @@ label {
     font-weight: bold;
 }
 
-@-webkit-keyframes moveclouds { 
-    0% { 
+@-webkit-keyframes moveclouds {
+    0% {
         top: 500px;
     }
-    100% { 
+    100% {
         top: -500px;
     }
 }
 
-@-webkit-keyframes sideWays { 
-    0% { 
+@-webkit-keyframes sideWays {
+    0% {
         margin-left:0px;
     }
-    100% { 
+    100% {
         margin-left:50px;
     }
 }
 
-@-moz-keyframes moveclouds {     
-    0% { 
+@-moz-keyframes moveclouds {
+    0% {
         top: 500px;
     }
 
-    100% { 
+    100% {
         top: -500px;
     }
 }
@@ -251,10 +255,10 @@ label {
     }
 }
 @-o-keyframes moveclouds {
-    0% { 
+    0% {
         top: 500px;
     }
-    100% { 
+    100% {
         top: -500px;
     }
 }
@@ -266,4 +270,61 @@ label {
     100% {
         margin-left:50px;
     }
+}
+
+
+.lestabs {
+
+  float: none;
+  list-style: none;
+  position: relative;
+
+}
+.lestabs li.thetabs{
+  float: left;
+  display: block;
+}
+
+
+.lestabs input[type="radio"] {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+}
+.lestabs label {
+  display: block;
+  padding: 14px 21px;
+  border-radius: 2px 2px 0 0;
+  font-size: 20px;
+  font-weight: normal;
+  text-transform: uppercase;
+
+  cursor: pointer;
+  position: relative;
+  top: 4px;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+
+
+
+.lestabs .tab-content {
+  z-index: 2;
+  display: none;
+  overflow: hidden;
+  width: 100%;
+  padding: 25px;
+  position: absolute;
+  left: 0;
+
+}
+.lestabs [id^="tab"]:checked + label {
+  top: 0;
+  padding-top: 17px;
+
+}
+.lestabs [id^="tab"]:checked ~ [id^="tab-content"] {
+  display: block;
 }

@@ -9,13 +9,24 @@ function playRevision(data, svg_area, silent) {
         $('#edit_counter').html('You have seen a total of <span>' + insert_comma(total_edits) + ' edits</span>.');
     }
 
-
     var size = data.size / 1000;
     var label_text = data.timestamp;
     var csize = size;
     var no_label = false;
     var type;
 
+    if(categoriescache != null && data.categories != null)
+    {
+      let diff = arrayDiff(data.categories, categoriescache);
+
+      if(diff.length > 0)
+      {
+        let str = data.timestamp + diff;
+        changes_rc(str, 20)
+      }
+    }
+
+    categoriescache = data.categories;
 
     // if (/\[\[Cat/.test(data['*'])) {
     //     console.log('Cat présente');
@@ -24,12 +35,12 @@ function playRevision(data, svg_area, silent) {
 
     if (data.userid == 0) {
          type = 'anon';
-    } 
+    }
     //Purple if bot
     else if (/bot/i.test(data.user)) {
         type = 'bot';
     //Green if user
-    } 
+    }
     else {
          type = 'user';
     }
@@ -48,7 +59,7 @@ function playRevision(data, svg_area, silent) {
             play_sound(size, 'sub', 1);
         }
     }
-    
+
     if (silent) {
         var starting_opacity = 0.2;
     } else {
@@ -142,10 +153,10 @@ function playRevision(data, svg_area, silent) {
 function newRev (data, svg_area) {
 
 
-                    // if (!isNaN(data.change_size) && (TAG_FILTERS.length == 0 || $(TAG_FILTERS).filter($.map(data.hashtags, function(i) { 
+                    // if (!isNaN(data.change_size) && (TAG_FILTERS.length == 0 || $(TAG_FILTERS).filter($.map(data.hashtags, function(i) {
                     //     return i.toLowerCase();
                     // })).length > 0)) {
-                    // 
+                    //
                         if (TAG_FILTERS.length > 0) {
                             console.log('Filtering for: ' + TAG_FILTERS)
                         }
@@ -197,7 +208,7 @@ function newRev (data, svg_area) {
 
                         log_rc(rc_str, 20);
 
-                        playRevision(data, svg_area);        
+                        playRevision(data, svg_area);
 
     };
 
@@ -207,7 +218,7 @@ function timediff(timestamp, svg)
 {
     var date1 = new Date(timestamp);
     if(cachedate != null)
-    {  
+    {
     var date2 = cachedate;
     var timeDiff = Math.abs(date2.getTime() - date1.getTime());
     var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
@@ -240,6 +251,24 @@ var log_rc = function(rc_str, limit) {
         }
     }
 };
+
+//Add a log
+var changes_rc = function(rc_str, limit) {
+  console.log("OKKK ! changes_rc");
+
+    $('#changes-rc').prepend('<li>' + rc_str + '</li>');
+
+    // if (limit) {
+    //     if ($('#rc-log li').length > limit) {
+    //         $('#rc-log li').slice(limit, limit + 1).remove();
+    //     }
+    // }
+
+};
+
+
+
+
 /*
 var rate_bg = svg.append('rect')
     .attr('opacity', 0.0)
@@ -310,35 +339,6 @@ var disable = function(setting) {
     set_hash_settings(hash_settings);
 };
 
-window.onhashchange = function () {
-    var hash_settings = return_hash_settings();
-    for (var lang in SOCKETS) {
-        if (hash_settings.indexOf(lang) >= 0) {
-            if (!SOCKETS[lang].connection || SOCKETS[lang].connection.readyState == 3) {
-                SOCKETS[lang].connect();
-                $('#' + lang + '-enable').prop('checked', true);
-            }
-        } else {
-            if ($('#' + lang + '-enable').is(':checked')) {
-                $('#' + lang + '-enable').prop('checked', false);
-            }
-            if (SOCKETS[lang].connection) {
-                SOCKETS[lang].close();
-            }
-        }
-    }
-    if (hash_settings.indexOf('notitles') >= 0) {
-        s_titles = false;
-    } else {
-        s_titles = true;
-    }
-    if (hash_settings.indexOf('nowelcomes') >= 0) {
-        s_welcome = false;
-    } else {
-        s_welcome = true;
-    }
-    set_hash_settings(hash_settings);
-};
 
 var make_click_handler = function($box, setting) {
     return function() {
@@ -420,7 +420,7 @@ function update_bg_inverval(bg_inverval, svg_area) {
 
 function getContainer(svg_area, translateWidth)
 {
- return svg_area.append('g').attr('transform', 'translate(' + translateWidth + ', ' + (height - 25) + ')');   
+ return svg_area.append('g').attr('transform', 'translate(' + translateWidth + ', ' + (height - 25) + ')');
 }
 
 
@@ -430,7 +430,7 @@ function getBox(container, fill, opacity, width, height)
             .attr('fill', newuser_box_color)
             .attr('opacity', opacity)
             .attr('width', width)
-            .attr('height', height);   
+            .attr('height', height);
 }
 
 
@@ -453,4 +453,25 @@ var insert_comma = function(s) {
     } else {
         return s;
     }
+}
+
+
+
+
+function arrayDiff(a1, a2) {
+  var diff = {};
+
+  for (var i = 0; i < a1.length; i++) {
+    diff[a1[i]] = true;
+  }
+
+  for (var i = 0; i < a2.length; i++) {
+    if (diff[a2[i]]) {
+      delete diff[a2[i]];
+    } else {
+      diff[a2[i]] = true;
+    }
+  }
+
+  return Object.keys(diff);
 }

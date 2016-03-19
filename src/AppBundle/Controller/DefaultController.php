@@ -87,6 +87,49 @@ class DefaultController extends Controller
 
 
 
+  /**
+  * @Route("/manage", name="manageentities")
+  */
+public function manageEntitiesAction(Request $request)
+ {
+
+    $em = $this->getDoctrine()->getManager();
+    $records = $em->getRepository("AppBundle:Entity")->findAll();
+
+    return $this->render('manage.html.twig', array('entities'=>$records, 'error' => null));
+ }
+
+
+  /**
+  * @Route("/entity/delete/{entityid}", name="deleteentity")
+  */
+public function deleteEntityAction(Request $request, $entityid)
+ {
+
+
+     $em = $this->getDoctrine()->getManager();
+
+     $entity = $em->getRepository('AppBundle:Entity')->find($entityid);
+
+     $em->remove($entity);
+     $em->flush();
+
+    $linkedrevisions = $em->getRepository('AppBundle:Revision')->findByIdEntity($entityid);
+
+    foreach ($linkedrevisions as $revision) {
+     $em->remove($revision);
+    }
+
+    $em->flush();
+
+    $info = "Entity successfully deleted !";
+
+    return $this->render('error.html.twig', array('error'=>$info));
+  }
+
+
+
+
 /**
 * @Route("/entity/{entityid}/{category}", name="getcategory")
 */
@@ -129,6 +172,8 @@ return $this->render('category.html.twig', array("entity" => $entity, "revisions
 }
 
 
+
+
 /**
 * @Route("/entity/{entityid}", name="selectedentity")
 */
@@ -167,7 +212,7 @@ public function addEntitiesAction(Request $request)
 
    $data = array();
    ///////Create initial form///////
-    
+
     //Set the action attribute
     $form = $this->createFormBuilder($data, array(
         'action' => "/add/",
@@ -202,7 +247,7 @@ public function addEntitiesAction(Request $request)
             //Stock the result (if import has succeeded or failed) in an array
             $imported[$value] = $callback;
             }
-            
+
         }
     } else {
         echo 'no data submitted';
@@ -366,7 +411,7 @@ public static function getRevisions($id, $continue, $revisions)
 
       echo "<b>".$val['revid']." - ".date($val['timestamp'])."</b><br>";
       flush();
-      
+
       foreach ($matches_out[0]as $key => $value) {
         $str = substr($value, 11, -2);
         $str = str_replace($healthy, $yummy, $str);
@@ -407,7 +452,7 @@ public static function getRevisions($id, $continue, $revisions)
 
 // Se servir de ces fonctions
 public static function getCategories($revision)
-{   
+{
 
   $healthy = array("| ", "|", " ");
   $yummy   = array("", "","_");
@@ -434,7 +479,7 @@ public static function getCategories($revision)
 }
 
 public static function get1Revisions($data)
-{   
+{
 
     reset($data);
     $key = key($data);
@@ -495,7 +540,7 @@ public static function getDescription($slug){
     }
 
 
-  
+
 
   return $lereturn;
 }
