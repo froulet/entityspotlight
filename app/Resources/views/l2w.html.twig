@@ -297,6 +297,12 @@
 
               let endDate = $('#endDate').val() + "000000";
 
+              $.ajax({
+                url: "/api/addentity/"+entityId,
+                success: function(data, xhr, status) {
+                }
+              });
+
               callWikipediaAPI(entityId, startDate, endDate, null);
         });
 
@@ -397,7 +403,7 @@
                 <ul class="lestabs">
                     <li class='thetabs'>
                         <input type="radio" name="tabs" id="tab1" checked />
-                        <label for="tab1">Recent Changes</label>
+                        <label for="tab1">Revisions</label>
                         <div id="tab-content1" class="tab-content">
 
                             <div id='rc-log-c'>

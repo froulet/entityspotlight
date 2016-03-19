@@ -38,6 +38,20 @@ class ApiController extends Controller
 
 
     /**
+     * @Route("/addentity/{entityid}", name="addEntity")
+     */
+    public function addEntityAction($entityid)
+    {
+
+        DefaultController::createEntity($entityid);
+        $response = new Response("OK !");
+
+        return $response;
+    }
+
+
+
+    /**
      * @Route("/getlistrevisions/{entityid}", name="getListRevisions")
      */
     public function getListRevisionsAction($entityid)
@@ -54,7 +68,7 @@ class ApiController extends Controller
             );
 
         $revisions = $query->getResult();
-        
+
 
 
         $response = new Response($serializer->serialize($revisions, 'json'));
@@ -66,7 +80,7 @@ class ApiController extends Controller
      * @Route("/querywiki/{entityid}/{period}/{continue}", name="querywiki")
      */
     public function querywiki($entityid, $period, $continue)
-    {   
+    {
 
         $encoders = array(new XmlEncoder(), new JsonEncoder());
         $normalizers = array(new ObjectNormalizer());
@@ -74,7 +88,7 @@ class ApiController extends Controller
 
          $dates = explode("-", $period);
          $start = $dates[0]; //end, if &rvdir=older
-         $end = $dates[1];  //start, if &rvdir=older 
+         $end = $dates[1];  //start, if &rvdir=older
 
 
          $url = "https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=ids%7Ctimestamp%7Cuser%7Cuserid%7Ctags%7Cflags%7Ccontent%7Csize&format=json&pageids=".$entityid."&rvlimit=50&rvstart=".$start."&rvend=".$end."&rvdir=older";
@@ -87,14 +101,13 @@ class ApiController extends Controller
 
          $cat = DefaultController::get1Revisions($data['query']['pages']);
 
-         
          $cont = array();
          $cont['continue'] = DefaultController::checkContinue($data);
 
          $gen = array();
          $gen['revisions'] = $cat;
          $gen['continue'] = $cont;
-         
+
 
         $response = new Response($serializer->serialize($gen , 'json'));
         return $response;

@@ -48,8 +48,13 @@ margin: 0 0 1.424rem 0;
 	height: 40%;
 }
 
+html, body
+{
+	height:100%;
+}
+
 .section.no-pad-bot {
-    min-height: 549px;
+    height: 100%
 }
 
 

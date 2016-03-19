@@ -451,6 +451,7 @@ public static function getRevisions($id, $continue, $revisions)
 
 
 // Se servir de ces fonctions
+
 public static function getCategories($revision)
 {
 
@@ -514,10 +515,58 @@ public static function addContinue($continue, $url)
 
 
 
+public function createEntity($id)
+{
+
+  list($title, $extract)=self::getDescriptionById($id);
+
+  if($title == null)
+  {
+    echo "<br><b>Entity ".$id." not found.<b><br>";
+    return 0;
+  }
+
+  else
+      {
+          $type = self::getType($id);
+          $thumbnail = self::getThumbnail($id);
+
+          //We call the Service 'databasemanager'
+          $controller = $this->get('databasemanager');
+          $controller->createEntity($id, $title, $type, $extract, $thumbnail);
+        }
+
+}
+
+
+
+public function createRevision($title)
+{
+
+  list($pageid, $extract)=self::getDescription($title);
+
+  if($pageid == null)
+  {
+    echo "<br><b>Entity ".$title." not found.<b><br>";
+    return 0;
+  }
+
+  else
+      {
+          $type = self::getType($title);
+          $thumbnail = self::getThumbnail($title);
+
+          //We call the Service 'databasemanager'
+          $controller = $this->get('databasemanager');
+          $controller->createEntity($pageid, $title, $type, $extract, $thumbnail);
+        }
+
+}
+
+
 
 public static function getDescription($slug){
   $url = "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=select+distinct+%3Fid+%3Fabstract+where+%7B%0D%0A%0D%0A%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F".$slug."%3E+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2FwikiPageID%3E+%3Fid+.%0D%0A%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F".$slug."%3E+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2Fabstract%3E+%3Fabstract%0D%0A%0D%0AFILTER+langMatches%28lang%28%3Fabstract%29%2C%27en%27%29%0D%0A%7D+LIMIT+2&format=application%2Fsparql-results%2Bjson&timeout=30000";
-
 
   var_dump($url);
 
@@ -541,6 +590,39 @@ public static function getDescription($slug){
 
 
 
+
+  return $lereturn;
+}
+
+
+public static function getDescriptionById($id)
+{
+  $url = "http://dbpedia-live.openlinksw.com/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=SELECT+%3Furi+%3Fabstract+%3Flabel%0D%0A+WHERE+%7B%0D%0A%3Furi+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2FwikiPageID%3E+".$id."+.%0D%0A%0D%0A%3Furi+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2Fabstract%3E+%3Fabstract+.%0D%0A%0D%0A%3Furi+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%3E+%3Flabel%0D%0AFILTER+langMatches%28lang%28%3Fabstract%29%2C%27en%27%29%0D%0A%0D%0A%7D+LIMIT+100%0D%0A&should-sponge=&format=json";
+
+
+  var_dump($url);
+
+  $response = self::curl($url);
+
+  $data = json_decode($response, true);
+
+
+
+  if(isset($data['results']['bindings']))
+  {
+      var_dump($data['results']['bindings'][0]);
+      $title= $data['results']['bindings'][0]['label']['value'];
+      echo "<br><br>LE PAGE TITLE <br>".$title;
+
+      $extract= $data['results']['bindings'][0]['abstract']['value'];
+      echo "<br><br>LE EPIC EXTRACT <br>".$extract;
+      $lereturn = array($title, $extract);
+  }
+
+  else
+    {
+        $lereturn = array(null, null);
+    }
 
   return $lereturn;
 }
