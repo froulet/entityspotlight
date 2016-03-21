@@ -16,6 +16,8 @@ use AppBundle\Form\EntityImport;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class DefaultController extends Controller
 {
@@ -426,10 +428,8 @@ public static function getRevisions($id, $continue, $revisions)
 
       if (!empty($revisions)) {
         $diff = array_diff($revisions[$tkey][2], $newcategories);
-
         if (sizeof($diff) > 0)
         {
-          echo "<br>CHANGEMENT ICI !!<br>";
           $revisions[] = $rev;
         }
       }

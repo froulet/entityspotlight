@@ -15,15 +15,10 @@ function playRevision(data, svg_area, silent) {
     var no_label = false;
     var type;
 
-    if(categoriescache != null && data.categories != null)
+    if(data.categories != null)
     {
-      let diff = arrayDiff(data.categories, categoriescache);
-
-      if(diff.length > 0)
-      {
-        let str = data.timestamp + diff;
-        changes_rc(str, 20)
-      }
+        let str = data.timestamp + data.categories;
+        changes_rc(data.timestamp, data.categories, 20)
     }
 
     categoriescache = data.categories;
@@ -32,6 +27,7 @@ function playRevision(data, svg_area, silent) {
     //     console.log('Cat présente');
     // }
 
+    console.log(data.userid);
 
     if (data.userid == 0) {
          type = 'anon';
@@ -253,10 +249,10 @@ var log_rc = function(rc_str, limit) {
 };
 
 //Add a log
-var changes_rc = function(rc_str, limit) {
+var changes_rc = function(date, rc_str, limit) {
   console.log("OKKK ! changes_rc");
 
-    $('#changes-rc').prepend('<li>' + rc_str + '</li>');
+    $('#changes-rc').prepend("<li>"+rc_str+"<span class='note'>" + date + "</span></li>");
 
     // if (limit) {
     //     if ($('#rc-log li').length > limit) {

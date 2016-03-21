@@ -193,24 +193,19 @@
 
         function callWikipediaAPI(wikipediaPage, startDate, endDate, cont) {
 
-
-             if(cont == null)
-             {
-                 cont = 'n';
-             }
+              if(cont == null)
+              {
+                  cont = "no";
+              }
 
              url = "/api/querywiki/"+wikipediaPage+"/"+endDate+"-"+startDate+"/"+cont;
+
+             console.log(url);
 
             $.getJSON(url, function( data ) {
               console.log("YUUUUUP");
 
-              if (data['continue']['continue']!= null) {
-                     cont = data['continue']['continue'];
-                 }
-                 else
-                 {
-                      cont = null;
-                 }
+                  console.log(data);
 
                  extractData(data, wikipediaPage);
                  if(quit)
@@ -219,12 +214,14 @@
                  quit = false;
                 }
 
-                if(cont != null)
-                {
-                    $('#stillloading').text(" (Still loading ...)");
-                     callWikipediaAPI(wikipediaPage, startDate, endDate, cont);
-                     return;
-                 }
+                if(data['revisions'].length == 100)
+                 {
+                     $('#stillloading').text(" (Still loading ...)");
+                      console.log(data['revisions'][data['revisions'].length-1].revid + " Le revid");
+                      //callWikipediaAPI(wikipediaPage, startDate, endDate, data['revisions'][data['revisions'].length-1].id);
+
+                      return;
+                  }
 
                  $('#stillloading').text("");
 
@@ -242,6 +239,7 @@
 
             for (var i = 0; i < revisions.length; i++) {
                 allrevisions.push(revisions[i]);
+                console.log(revisions[i]);
             }
 
         }
@@ -311,6 +309,7 @@
             quit = true;
         });
 
+
         $('#welcome').click(make_click_handler($('#welcome'), 'nowelcomes')
         );
 
@@ -323,6 +322,53 @@
         $('#hide_rc_box').click(
             function() {$("#rc-log").toggle();}
         );
+
+      var availableTags = [
+        "ActionScript",
+        "AppleScript",
+        "Asp",
+        "BASIC",
+        "C",
+        "C++",
+        "Clojure",
+        "COBOL",
+        "ColdFusion",
+        "Erlang",
+        "Fortran",
+        "Groovy",
+        "Haskell",
+        "Java",
+        "JavaScript",
+        "Lisp",
+        "Perl",
+        "PHP",
+        "Python",
+        "Ruby",
+        "Scala",
+        "Scheme"
+      ];
+
+      $("#entityId").autocomplete({
+          source: function(request, response) {
+              $.ajax({
+                  url: "http://en.wikipedia.org/w/api.php",
+                  dataType: "jsonp",
+                  data: {
+                      'action': "opensearch",
+                      'format': "json",
+                      'search': request.term
+                  },
+                  success: function(data) {
+                      response(data[1]);
+                  }
+              });
+          }
+      });
+
+
+
+
+
 
         $('#about-link').click(function(){
             // because we use window.location to set languages.
@@ -375,8 +421,8 @@
             <b> Entity Id : </b>
             <input type="text" id="entityId" value='2007'> <br>
             <br>
-            Start date : <input type="text" id="startDate" value='20120101'>
-            End date : <input type="text" id="endDate" value='20160101'><br>
+            Start date : <input type="text" id="startDate" value='20130101'>
+            End date : <input type="text" id="endDate" value='20120101'><br>
 
             <p>
             <input type="submit" id='listen2' value='play'>
