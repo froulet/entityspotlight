@@ -51,14 +51,7 @@ class DefaultController extends Controller
     ->getRepository('AppBundle:Entity')
     ->findByTitle($tq);
 
-    //Si l'entité existe déjà
-    if ($entity) {
-      echo "EXISTE DEJA";
-      return $this->render('entity-small.html.twig', array('entity' => $entity[0]));
-    }
 
-    else
-    {
       $em = $this->getDoctrine()->getManager();
       $query = $em->getRepository("AppBundle:Entity")->createQueryBuilder('e')
       ->where('e.title LIKE :title')
@@ -75,7 +68,7 @@ class DefaultController extends Controller
     //var_dump($pagination);
 
     return $this->render('search.html.twig', array('pagination' => $pagination, 'error'=>$error));
-  }
+  
 }
 
   /**
@@ -207,9 +200,9 @@ public function selectedEntityAction(Request $request, $entityid)
 
 
 /**
-* @Route("/add/", name="addentities")
+* @Route("/bulkimport/", name="bulkimport")
 */
-public function addEntitiesAction(Request $request)
+public function bulkimportAction(Request $request)
 {
 
    $data = array();
@@ -252,7 +245,7 @@ public function addEntitiesAction(Request $request)
 
         }
     } else {
-        echo 'no data submitted';
+        //echo 'no data submitted';
         $imported = array();
     }
 
@@ -340,25 +333,25 @@ public static function get1Revisions($data)
 
 
 
-public function createEntity($id)
+public function createEntity($entityname)
 {
 
-  list($title, $extract)=self::getDescriptionById($id);
+  list($pageid, $extract)=self::getDescription($entityname);
 
-  if($title == null)
+  if($pageid == null)
   {
-    echo "<br><b>Entity ".$id." not found.<b><br>";
+    echo "<br><b>Entity ".$pageid." not found.<b><br>";
     return 0;
   }
 
   else
       {
-          $type = self::getType($id);
-          $thumbnail = self::getThumbnail($id);
+          $type = self::getType($pageid);
+          $thumbnail = self::getThumbnail($pageid);
 
           //We call the Service 'databasemanager'
           $controller = $this->get('databasemanager');
-          $controller->createEntity($id, $title, $type, $extract, $thumbnail);
+          $controller->createEntity($pageid, $entityname, $type, $extract, $thumbnail);
         }
 
 }
@@ -399,7 +392,12 @@ public function parseEntities($entityname, $start, $end, $limit, $continue)
 {           
 
          $entityid= $this->createRevision($entityname);
-           //We call the Service 'python'
+
+         if($entityid == 0)
+         {
+          return 0;
+         }
+
           $controller = $this->get('python');
           $result = $controller->entityParsing($entityname, $start, $end, $limit, $continue);
 
@@ -423,13 +421,6 @@ public function parseEntities($entityname, $start, $end, $limit, $continue)
 
             return 1;
 }
-
-
-
-
-
-
-
 
 
 

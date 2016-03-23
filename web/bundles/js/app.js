@@ -18,7 +18,7 @@ function playRevision(data, svg_area, silent) {
     if(data.categories != null)
     {
         let str = data.timestamp + data.categories;
-        changes_rc(data.timestamp, data.categories, 20)
+        changes_rc(data.timestamp, data.categories, 4)
     }
 
     categoriescache = data.categories;
@@ -254,11 +254,11 @@ var changes_rc = function(date, rc_str, limit) {
 
     $('#changes-rc').prepend("<li>"+rc_str+"<span class='note'>" + date + "</span></li>");
 
-    // if (limit) {
-    //     if ($('#rc-log li').length > limit) {
-    //         $('#rc-log li').slice(limit, limit + 1).remove();
-    //     }
-    // }
+    if (limit) {
+         if ($('#changes-rc  li').length > limit) {
+             $('#changes-rc  li').slice(limit, limit + 1).remove();
+         }
+     }
 
 };
 

@@ -14,7 +14,8 @@
       {% endif %}
 
       {% for entity in entities %}
-      <p>{{entity.title}} <a href="/entity/delete/{{entity.idEntity}}">Delete</a></p>
+      <p>{{entity.title}} 
+      <a href="/entity/delete/{{entity.idEntity}}" class="waves-effect waves-light btn">Delete</a></p>
       {% endfor %}
 
     </div>

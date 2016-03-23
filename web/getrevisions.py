@@ -26,7 +26,7 @@ if offset == "no":
          end=end
         #  parse= 'true'
      )
-    
+
 else:
     revisions = session.revisions.query(
          properties={'ids', 'content', 'timestamp', 'user', 'userid', 'tags', 'size'},
@@ -40,9 +40,6 @@ else:
 
 
 
-
-    
-
 cache = []
 gen = {}
 allrevisions = []
@@ -52,34 +49,39 @@ for rev in revisions:
      lerev = {}
      #print('Timtestamp: ' + rev['timestamp'])
      #print (rev['*'])
-     match = re.findall(r'\[\[Category.+\]\]', rev['*'])
-# If-statement after search() tests if it succeeded
-     categories = []
-     for cat in match:
-    # do something with each found email string
+     if '*' in rev.keys():
+         match = re.findall(r'\[\[Category.+\]\]', rev['*'])
+         categories = []
+         for cat in match:
+        # do something with each found email string
 
-        cat=cat.replace("| ", "")
-        cat=cat.replace("[", "")
-        cat=cat.replace("]", "")
-        cat=cat.replace(" ", "_")
-        cat=cat[9:]
-        categories.append(cat)
+            cat=cat.replace("| ", "")
+            cat=cat.replace("[", "")
+            cat=cat.replace("]", "")
+            cat=cat.replace(" ", "_")
+            cat=cat[9:]
+            categories.append(cat)
 
-     if categories:
-         if not compare(categories, cache):
-             #print("Pas les mêmes")
-             #print(categories)
-             lerev['categories'] = categories
-         cache=categories
-     lerev['revid'] = rev['revid']
-     lerev['user'] = rev['user']
-     lerev['userid'] = rev['userid']
-     lerev['timestamp'] = rev['timestamp']
-     lerev['tag'] = rev['tags']
-     lerev['size'] = rev['size']
-     if 'minor' in rev:
-         lerev['minor'] = rev['minor']
-     allrevisions.append(lerev)
+         if categories:
+             if not compare(categories, cache):
+                 #print("Pas les mêmes")
+                 #print(categories)
+                 lerev['categories'] = categories
+             cache=categories
+         lerev['revid'] = rev['revid']
+         lerev['user'] = rev['user']
+         lerev['userid'] = rev['userid']
+         lerev['timestamp'] = rev['timestamp']
+         lerev['tag'] = rev['tags']
+         lerev['size'] = rev['size']
+         if 'minor' in rev:
+             lerev['minor'] = rev['minor']
+         allrevisions.append(lerev)
+
+
+if offset != "no":
+    allrevisions.pop(0)
+
 
 gen["revisions"] = allrevisions;
 #gen["continue"] = '';

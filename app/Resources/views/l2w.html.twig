@@ -214,7 +214,7 @@
                  quit = false;
                 }
 
-                if(data['revisions'].length == 100)
+                if(data['revisions'].length == 50 || data['revisions'].length == 49)
                  {
                      $('#stillloading').text(" (Still loading ...)");
                      let nextid = data['revisions'][data['revisions'].length-1].revid;

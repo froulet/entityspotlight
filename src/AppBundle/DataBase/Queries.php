@@ -55,13 +55,13 @@ public function createRevision($categoryTitle, $idEntity, $idRevision, $date)
 
   //Si l'entité n'existe pas déjà, on la crée
   if (!$revision) {
-    echo "Nouvelle Révision";
+    //echo "Nouvelle Révision";
     $revision = new Revision();
   }
 
   else
   {
-    echo "Already existing revision.";
+    //echo "Already existing revision.";
     $revision = $revision[0];
   }
 
@@ -76,6 +76,35 @@ public function createRevision($categoryTitle, $idEntity, $idRevision, $date)
   $this->em->flush();
 }
 
+
+public function saveRevisions($result, $entityname)
+{
+            $data = json_decode($result, true);
+            $entityid = $this->getEntityIdByName($entityname);
+
+           foreach ($data['revisions'] as $key => $value) {
+            //var_dump($value);
+
+                if(isset($value['categories']))
+                {
+                    foreach ($value['categories'] as $kay => $val) {
+                        $this->createRevision($val, $entityid, $value['revid'], $value['timestamp']);
+                    }
+                }
+          
+            }
+}
+
+
+public function getEntityIdByName($entitytitle)
+{
+
+ $entity = $this->em->getRepository('AppBundle:Entity')
+  ->findOneBy(array('title' => $entitytitle));
+
+  return $entity->getIdEntity();
+
+}
 
 public function getLastRevision($categoryTitle, $idEntity, $idRevision, $date)
 {

@@ -87,54 +87,19 @@ class ApiController extends Controller
          $dates = explode("-", $period);
          $start = $dates[0]; //end, if &rvdir=older
          $end = $dates[1];  //start, if &rvdir=older
-         $limit = 100;
+         $limit = 50;
 
         $controller = $this->get('python');
         $result = $controller->entityParsing($entityname, $start, $end, $limit, $continue);
 
+         $database = $this->get('databasemanager');
+         $database->saveRevisions($result, $entityname);
 
            $response = new Response($result);
            return $response;
       }
 
 
-
-    /**
-     * @Route("/bulkimport/{entityname}/{period}/{continue}", name="bulkImport")
-     */
-    public function bulkImport($entityname, $period, $continue)
-    {
-         $entityid=DefaultController::createRevision($entityname);
-         $dates = explode("-", $period);
-         $start = $dates[0]; //end, if &rvdir=older
-         $end = $dates[1];  //start, if &rvdir=older
-         $limit = 500;
-
-         //We call the Service 'python'
-          $controller = $this->get('python');
-          $result = $controller->entityParsing($entityname, $start, $end, $limit, $continue);
-
-          $data = json_decode($result, true);
-
-          //We call the Service 'databasemanager'
-          $database = $this->get('databasemanager');
-           
-           foreach ($data['revisions'] as $key => $value) {
-            //var_dump($value);
-
-                if(isset($value['categories']))
-                {
-                    foreach ($value['categories'] as $kay => $val) {
-                        echo "LA CATE :".$val."<br>";
-                        $database->createRevision($val, $entityid, $value['revid'], $value['timestamp']);
-                    }
-                }
-          
-            }
-
-          return new Response("D'accord.");
-
-      }
 
 
 }
