@@ -213,6 +213,7 @@ public function addEntitiesAction(Request $request)
 {
 
    $data = array();
+
    ///////Create initial form///////
 
     //Set the action attribute
@@ -224,7 +225,6 @@ public function addEntitiesAction(Request $request)
     ))
     ->add('save', SubmitType::class)
     ->getForm();
-
 
     $form->handleRequest($request);
 
@@ -244,7 +244,7 @@ public function addEntitiesAction(Request $request)
             $output = preg_replace( '/[^A-Za-z\~\\s\|]/', '', $value);
             $value = preg_replace( '/\\s/', '_', trim($output));
             echo "<br>".$value;
-            $callback=self::getDeltas($value);
+            $callback=$this->parseEntities($value, "20130101000000", "20160101000000", "500", "no");
 
             //Stock the result (if import has succeeded or failed) in an array
             $imported[$value] = $callback;
@@ -270,181 +270,6 @@ public function installedAction(Request $request)
   return $this->render('default/index.html.twig', [
     'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..'),
   ]);
-}
-
-
-/**
-* @Route("/parse/entities/{slug}")
-*/
-public function getDeltas($slug)
-{
-
-  //$encoders = array(new XmlEncoder(), new JsonEncoder());
-  //$normalizers = array(new ObjectNormalizer());
-  //$serializer = new Serializer($normalizers, $encoders);
-
-  list($pageid, $extract)=self::getDescription($slug);
-
-  if($pageid == null)
-  {
-    echo "<br><b>Entity ".$slug." not found.<b><br>";
-    return 0;
-  }
-
-  else
-      {
-          $type = self::getType($slug);
-
-          $thumbnail = self::getThumbnail($slug);
-
-
-          $entity = $this->getDoctrine()
-          ->getRepository('AppBundle:Entity')
-          ->find($pageid);
-
-          //Si l'entité n'existe pas déjà, on la crée
-          if (!$entity) {
-            $entity = new Entity();
-          }
-
-          $entity->setIdEntity($pageid);
-          $entity->setTitle($slug);
-          $entity->setType($type);
-          $entity->setDescription($extract);
-          $entity->setImglink($thumbnail);
-          $em = $this->getDoctrine()->getManager();
-          $em->persist($entity);
-          $em->flush();
-
-
-          $continue = null;
-          $revisions = array();
-
-          do{
-            list($revisions, $continue) = self::getRevisions($pageid, $continue, $revisions);
-          }
-          while($continue != null);
-
-          foreach ($revisions as $key => $value) {
-            echo "<br> <b> Changement le".$value[1]."<b>";
-
-            //Créer une nouvelle révision ici
-
-            //
-            foreach ($value[2] as $key2 => $categorytitle) {
-              echo "<br>".$categorytitle;
-
-
-              $revision = $this->getDoctrine()
-              ->getRepository('AppBundle:Revision')
-              ->findBy(array('idRevision' => $value[0], 'categoryTitle' => $categorytitle ));
-
-              //Si l'entité n'existe pas déjà, on la crée
-              if (!$revision) {
-                echo "Nouvelle Révision";
-                $revision = new Revision();
-              }
-
-              else
-              {
-                $revision = $revision[0];
-              }
-
-
-              $revision->setCategoryTitle($categorytitle);
-              $revision->setidEntity($pageid);
-              $revision->setidRevision($value[0]);
-              $date = new \DateTime($value[1]);
-              $revision->setDate($date);
-              $em = $this->getDoctrine()->getManager();
-              $em->persist($revision);
-              $em->flush();
-
-
-            }
-
-          }
-
-          echo "<br>";
-          return 1;
-    }
-
-}
-
-public static function getRevisions($id, $continue, $revisions)
-{
-  $url = "https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=ids%7Ctimestamp%7Ccontent&format=json&pageids=".$id."&rvlimit=50&rvstart=20160101000000&rvend=20130101000000&rvdir=older";
-
-  if($continue != null)
-  {
-    $url = $url."&rvcontinue=".$continue;
-  }
-
-  var_dump($url);
-
-  $response = self::curl($url);
-
-
-  //$lastPosts = $serializer->deserialize($response, null, 'json');
-  $data = json_decode($response, true);
-
-
-  reset($data["query"]["pages"]);
-  $key = key($data["query"]["pages"]);
-
-
-  $continue = self::checkContinue($data);
-
-  $categories = array();
-  $healthy = array("| ", "|", " ");
-  $yummy   = array("", "","_");
-
-  foreach ($data["query"]["pages"][$key]["revisions"] as $key => $val) {
-
-    $regex = "/\[\[Category:[^?*-@#]*?\]\]/";
-
-    $newcategories = array();
-
-    //if (($tmp = strstr($val["*"], '{{Reflist')) !== false) {
-    //     $str = substr($tmp, 1);
-    //}
-
-    if (preg_match_all($regex, $val["*"], $matches_out)) {
-
-      echo "<b>".$val['revid']." - ".date($val['timestamp'])."</b><br>";
-      flush();
-
-      foreach ($matches_out[0]as $key => $value) {
-        $str = substr($value, 11, -2);
-        $str = str_replace($healthy, $yummy, $str);
-        //echo $str."<br>";
-        $newcategories[] = $str;
-      }
-
-
-      $tkey = self::endKey($revisions);
-
-      $rev = [$val['revid'], $val['timestamp'], $newcategories];
-
-      if (!empty($revisions)) {
-        $diff = array_diff($revisions[$tkey][2], $newcategories);
-        if (sizeof($diff) > 0)
-        {
-          $revisions[] = $rev;
-        }
-      }
-
-      else
-      {
-        $revisions[] = $rev;
-      }
-
-    }
-  }
-
-  var_dump($revisions);
-  $lereturn = array($revisions, $continue);
-  return $lereturn;
 }
 
 
@@ -495,23 +320,23 @@ public static function get1Revisions($data)
 }
 
 
-public static function checkContinue($data)
-{
-    (isset($data["continue"]["rvcontinue"])) ? $cont = $data["continue"]["rvcontinue"] : $cont = null;
+// public static function checkContinue($data)
+// {
+//     (isset($data["continue"]["rvcontinue"])) ? $cont = $data["continue"]["rvcontinue"] : $cont = null;
 
-    return $cont;
-}
+//     return $cont;
+// }
 
 
-public static function addContinue($continue, $url)
-{
-  if($continue != null && $continue != 'n')
-  {
-    $url = $url."&rvcontinue=".$continue;
-  }
+// public static function addContinue($continue, $url)
+// {
+//   if($continue != null && $continue != 'n')
+//   {
+//     $url = $url."&rvcontinue=".$continue;
+//   }
 
-  return $url;
-}
+//   return $url;
+// }
 
 
 
@@ -561,7 +386,52 @@ public function createRevision($title)
           $controller->createEntity($pageid, $title, $type, $extract, $thumbnail);
         }
 
+  return $pageid;
 }
+
+
+
+
+
+
+
+public function parseEntities($entityname, $start, $end, $limit, $continue)
+{           
+
+         $entityid= $this->createRevision($entityname);
+           //We call the Service 'python'
+          $controller = $this->get('python');
+          $result = $controller->entityParsing($entityname, $start, $end, $limit, $continue);
+
+          $data = json_decode($result, true);
+
+          //We call the Service 'databasemanager'
+          $database = $this->get('databasemanager');
+           
+           foreach ($data['revisions'] as $key => $value) {
+            //var_dump($value);
+
+                if(isset($value['categories']))
+                {
+                    foreach ($value['categories'] as $kay => $val) {
+                        echo "LA CATE :".$val."<br>";
+                        $database->createRevision($val, $entityid, $value['revid'], $value['timestamp']);
+                    }
+                }
+          
+            }
+
+            return 1;
+}
+
+
+
+
+
+
+
+
+
 
 
 

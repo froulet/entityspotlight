@@ -26,6 +26,22 @@ if offset == "no":
          end=end
         #  parse= 'true'
      )
+    
+else:
+    revisions = session.revisions.query(
+         properties={'ids', 'content', 'timestamp', 'user', 'userid', 'tags', 'size'},
+         titles={title},
+         direction="newer",
+         limit=limit,
+         start_id=offset,
+         end=end
+        #  parse= 'true'
+     )
+
+
+
+
+    
 
 cache = []
 gen = {}

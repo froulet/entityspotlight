@@ -50,7 +50,7 @@ class Queries extends AbstractType
 
 public function createRevision($categoryTitle, $idEntity, $idRevision, $date)
 {
-  $revision = $$this->em->getRepository('AppBundle:Revision')
+  $revision = $this->em->getRepository('AppBundle:Revision')
   ->findBy(array('idRevision' => $idRevision, 'categoryTitle' => $categoryTitle ));
 
   //Si l'entité n'existe pas déjà, on la crée
@@ -61,14 +61,14 @@ public function createRevision($categoryTitle, $idEntity, $idRevision, $date)
 
   else
   {
+    echo "Already existing revision.";
     $revision = $revision[0];
   }
-
 
   $revision->setCategoryTitle($categoryTitle);
   $revision->setidEntity($idEntity);
   $revision->setidRevision($idRevision);
-  $date = new \DateTime($value[1]);
+  $date = new \DateTime($date);
   $revision->setDate($date);
 
   //Persist the revision
@@ -76,6 +76,13 @@ public function createRevision($categoryTitle, $idEntity, $idRevision, $date)
   $this->em->flush();
 }
 
+
+public function getLastRevision($categoryTitle, $idEntity, $idRevision, $date)
+{
+  $revision = $this->em->getRepository('AppBundle:Revision')
+  ->findBy(array('idRevision' => $idRevision, 'idEntity' => $categoryTitle ));
+
+}
 
 
 

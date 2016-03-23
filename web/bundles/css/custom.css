@@ -54,7 +54,7 @@ html, body
 }
 
 .section.no-pad-bot {
-    height: 100%
+    min-height: 100%
 }
 
 

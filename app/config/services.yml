@@ -11,3 +11,7 @@ services:
     databasemanager:
         class: AppBundle\DataBase\Queries
         arguments: ['@doctrine.orm.entity_manager']
+
+    python:
+        class: AppBundle\Python\Python
+        arguments: []

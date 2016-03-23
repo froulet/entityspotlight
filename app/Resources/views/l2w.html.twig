@@ -205,7 +205,7 @@
             $.getJSON(url, function( data ) {
               console.log("YUUUUUP");
 
-                  console.log(data);
+                  //console.log(data);
 
                  extractData(data, wikipediaPage);
                  if(quit)
@@ -217,8 +217,10 @@
                 if(data['revisions'].length == 100)
                  {
                      $('#stillloading').text(" (Still loading ...)");
+                     let nextid = data['revisions'][data['revisions'].length-1].revid;
                       console.log(data['revisions'][data['revisions'].length-1].revid + " Le revid");
-                      //callWikipediaAPI(wikipediaPage, startDate, endDate, data['revisions'][data['revisions'].length-1].id);
+
+                      callWikipediaAPI(wikipediaPage, startDate, endDate, nextid);
 
                       return;
                   }
@@ -290,6 +292,7 @@
         $( "#listen2" ).click(function() {
 
               let entityId = $('#entityId').val();
+              entityId = entityId.replace(/ /g,"_");
 
               let startDate = $('#startDate').val() + "000000";
 

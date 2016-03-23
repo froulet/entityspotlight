@@ -79,9 +79,9 @@ class ApiController extends Controller
     }
 
         /**
-     * @Route("/querywiki/{entityid}/{period}/{continue}", name="querywiki")
+     * @Route("/querywiki/{entityname}/{period}/{continue}", name="querywiki")
      */
-    public function querywiki($entityid, $period, $continue)
+    public function querywiki($entityname, $period, $continue)
     {
 
          $dates = explode("-", $period);
@@ -89,17 +89,52 @@ class ApiController extends Controller
          $end = $dates[1];  //start, if &rvdir=older
          $limit = 100;
 
-         $process = new Process('python3.4 getrevisions.py '.$entityid.' '.$start.' '.$end.' '.$limit.' '.$continue);
-         $process->run();
-
-         // executes after the command finishes
-         if (!$process->isSuccessful()) {
-             throw new ProcessFailedException($process);
-         }
+        $controller = $this->get('python');
+        $result = $controller->entityParsing($entityname, $start, $end, $limit, $continue);
 
 
-           $response = new Response($process->getOutput());
+           $response = new Response($result);
            return $response;
       }
+
+
+
+    /**
+     * @Route("/bulkimport/{entityname}/{period}/{continue}", name="bulkImport")
+     */
+    public function bulkImport($entityname, $period, $continue)
+    {
+         $entityid=DefaultController::createRevision($entityname);
+         $dates = explode("-", $period);
+         $start = $dates[0]; //end, if &rvdir=older
+         $end = $dates[1];  //start, if &rvdir=older
+         $limit = 500;
+
+         //We call the Service 'python'
+          $controller = $this->get('python');
+          $result = $controller->entityParsing($entityname, $start, $end, $limit, $continue);
+
+          $data = json_decode($result, true);
+
+          //We call the Service 'databasemanager'
+          $database = $this->get('databasemanager');
+           
+           foreach ($data['revisions'] as $key => $value) {
+            //var_dump($value);
+
+                if(isset($value['categories']))
+                {
+                    foreach ($value['categories'] as $kay => $val) {
+                        echo "LA CATE :".$val."<br>";
+                        $database->createRevision($val, $entityid, $value['revid'], $value['timestamp']);
+                    }
+                }
+          
+            }
+
+          return new Response("D'accord.");
+
+      }
+
 
 }
