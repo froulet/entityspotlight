@@ -354,6 +354,7 @@ public function createEntity($entityname)
           $controller->createEntity($pageid, $entityname, $type, $extract, $thumbnail);
         }
 
+  return $pageid;
 }
 
 
@@ -429,7 +430,7 @@ public function parseEntities($entityname, $start, $end, $limit, $continue)
 public static function getDescription($slug){
   $url = "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=select+distinct+%3Fid+%3Fabstract+where+%7B%0D%0A%0D%0A%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F".$slug."%3E+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2FwikiPageID%3E+%3Fid+.%0D%0A%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F".$slug."%3E+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2Fabstract%3E+%3Fabstract%0D%0A%0D%0AFILTER+langMatches%28lang%28%3Fabstract%29%2C%27en%27%29%0D%0A%7D+LIMIT+2&format=application%2Fsparql-results%2Bjson&timeout=30000";
 
-  var_dump($url);
+  //var_dump($url);
 
   $response = self::curl($url);
 
@@ -438,9 +439,13 @@ public static function getDescription($slug){
   if(isset($data['results']['bindings'][0]['id']['value']))
   {
       $pageid= $data['results']['bindings'][0]['id']['value'];
-      echo "<br><br>LE PAGE ID <br>".$pageid;
+
+      //echo "<br><br>LE PAGE ID <br>".$pageid;
+      //
       $extract= $data['results']['bindings'][0]['abstract']['value'];
-      echo "<br><br>LE EPIC EXTRACT <br>".$extract;
+
+      //echo "<br><br>LE EPIC EXTRACT <br>".$extract;
+      
       $lereturn = array($pageid, $extract);
   }
 
@@ -448,8 +453,6 @@ public static function getDescription($slug){
     {
         $lereturn = array(null, null);
     }
-
-
 
 
   return $lereturn;
@@ -503,7 +506,9 @@ public static function getType($slug)
 
     if (($tmp = strstr($type, '#')) !== false) {
       $type = substr($tmp, 1);
-      echo "<br>LE STR ".$type."<br>";
+
+      //echo "<br>LE TYPE ".$type."<br>";
+      //
     }
   }
 
@@ -521,7 +526,7 @@ public static function getThumbnail($slug)
 {
   $url = "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=prefix+dbpedia%3A+%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F%3E%0D%0Aprefix+dbpedia-owl%3A+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2F%3E%0D%0A%0D%0Aselect+%3Fthumbnail+where+%7B+%0D%0A++dbpedia%3A".$slug."+dbpedia-owl%3Athumbnail+%3Fthumbnail+.%0D%0A%7D&format=json&CXML_redir_for_subjs=121&CXML_redir_for_hrefs=&timeout=30000&debug=on";
 
-  var_dump($url);
+  //var_dump($url);
 
   $response = self::curl($url);
 
@@ -530,7 +535,7 @@ public static function getThumbnail($slug)
   if(isset($data['results']['bindings'][0]['thumbnail']['value']))
   {
     $thumbnail = $data['results']['bindings'][0]['thumbnail']['value'];
-    echo "LA THUMBNAIL : <br>".$thumbnail."<br>";
+    //echo "LA THUMBNAIL : <br>".$thumbnail."<br>";
   }
   else
   {

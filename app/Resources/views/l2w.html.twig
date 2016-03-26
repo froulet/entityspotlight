@@ -85,6 +85,7 @@
         allrevisions = new Array();
         quit = true;
         categoriescache = null;
+        currentEntityId = null;
 
 
     /*
@@ -225,7 +226,14 @@
                       return;
                   }
 
-                 $('#stillloading').text("");
+                 $('#stillloading').html("<br>");
+
+                 $('<a>',{
+                      text: 'Entity Imported !',
+                      title: 'Done',
+                      href: '/entity/'+currentEntityId,
+                  }).appendTo('#stillloading');
+
 
                  console.log('done');
 
@@ -301,6 +309,7 @@
               $.ajax({
                 url: "/api/addentity/"+entityId,
                 success: function(data, xhr, status) {
+                  currentEntityId=data.trim();
                 }
               });
 
@@ -370,9 +379,6 @@
 
 
 
-
-
-
         $('#about-link').click(function(){
             // because we use window.location to set languages.
             $('html, body').animate({scrollTop:$(document).height()}, 'slow');
@@ -428,8 +434,8 @@
             End date : <input type="text" id="endDate" value='20120101'><br>
 
             <p>
-            <input type="submit" id='listen2' value='play'>
-            <input type="submit" id='stop' value='stop'>
+            <input type="submit" id='listen2' value='Play'>
+            <input type="submit" id='stop' value='Stop'>
             </p>
 
             <p>
@@ -443,7 +449,11 @@
       </div>
 
          <div class="row center">
-          <div id="state"><span id="nbleft"></span><span id="stillloading"></span></div><br>
+
+          <div id="state"><span id="nbleft"></span>
+            <span id="stillloading"></span>
+          </div>
+          <br>
 
               <div class='bg'>
 

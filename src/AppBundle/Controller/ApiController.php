@@ -45,9 +45,8 @@ class ApiController extends Controller
     public function addEntityAction($entityid)
     {
 
-        DefaultController::createEntity($entityid);
-        $response = new Response("OK !");
-
+        $id=DefaultController::createEntity($entityid);
+        $response = new Response($id);
         return $response;
     }
 
