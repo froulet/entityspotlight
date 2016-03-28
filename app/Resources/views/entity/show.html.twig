@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Entity</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Identity</th>
+                <td>{{ entity.idEntity }}</td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td>{{ entity.title }}</td>
+            </tr>
+            <tr>
+                <th>Type</th>
+                <td>{{ entity.type }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ entity.description }}</td>
+            </tr>
+            <tr>
+                <th>Imglink</th>
+                <td>{{ entity.imglink }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('entity_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('entity_edit', { 'id': entity.idEntity }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

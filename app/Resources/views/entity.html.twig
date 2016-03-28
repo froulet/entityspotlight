@@ -172,11 +172,13 @@
                 }
 
             var wheel = new wheelnav("wheelDiv");
-
             wheel.colors = colorpalette.gamebookers;
             wheel.wheelRadius = 160;
             wheel.cssMode = true;
-            wheel.slicePathFunction = slicePath().MenuSlice;
+
+            wheel.slicePathFunction = slicePath().StarBasePieSlice;
+            //wheel.sliceHoverPathFunction = slicePath().StarSlice;
+
             wheel.createWheel(categories);
 
             wheel.navItems.forEach(function(entry) {

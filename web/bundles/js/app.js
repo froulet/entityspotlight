@@ -18,7 +18,8 @@ function playRevision(data, svg_area, silent) {
     if(data.categories != null)
     {
         let str = data.timestamp + data.categories;
-        changes_rc(data.timestamp, data.categories, 4)
+        changes_rc(data.timestamp, data.categories, 4);
+        play_random_swell();
     }
 
     categoriescache = data.categories;
@@ -35,8 +36,8 @@ function playRevision(data, svg_area, silent) {
     //Purple if bot
     else if (/bot/i.test(data.user)) {
         type = 'bot';
-    //Green if user
     }
+    //Green if user
     else {
          type = 'user';
     }

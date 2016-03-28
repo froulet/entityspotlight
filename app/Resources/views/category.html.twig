@@ -29,7 +29,7 @@
 </div>
 
     <script type="text/javascript">
-    new Timesheet('timesheet', 2013, 2016, [
+    new Timesheet('timesheet', {{revisions|first.date | date('Y')}} , {{revisions|last.date | date('Y')}}, [
 
     {% for revision in revisions %}
       {% if revision.category_title == category %}

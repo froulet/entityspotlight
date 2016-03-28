@@ -74,6 +74,11 @@ html, body
 	font-weight: bold;
 }
 
+.timesheet
+{
+    height: 100% !important;
+}
+
 [class|=wheelnav-wheelDiv-slice-basic] {
     fill: #1572b6;
     stroke: none;
@@ -96,7 +101,7 @@ html, body
 }
 
 [class|=wheelnav-wheelDiv-title-basic] > tspan {
-   opacity: 0.5;
+   opacity: 0;
 }
 
 [class|=wheelnav-wheelDiv-title-selected] > tspan {

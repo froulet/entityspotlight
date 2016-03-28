@@ -83,19 +83,6 @@ class DefaultController extends Controller
 
 
   /**
-  * @Route("/manage", name="manageentities")
-  */
-public function manageEntitiesAction(Request $request)
- {
-
-    $em = $this->getDoctrine()->getManager();
-    $records = $em->getRepository("AppBundle:Entity")->findAll();
-
-    return $this->render('manage.html.twig', array('entities'=>$records, 'error' => null));
- }
-
-
-  /**
   * @Route("/entity/delete/{entityid}", name="deleteentity")
   */
 public function deleteEntityAction(Request $request, $entityid)
@@ -151,16 +138,11 @@ $stmt->bindValue("categoryTitle", $category);
 $stmt->execute();
 $revisions = $stmt->fetchAll();
 
-    // echo '<pre>';
-    // \Doctrine\Common\Util\Debug::dump($revisions);
-    // echo '</pre>';
-    //
-    //
-    // echo "<br><br><br>";
-
-
-
-//var_dump($revisions);
+     // echo '<pre>';
+     // \Doctrine\Common\Util\Debug::dump($revisions);
+     // echo '</pre>';
+    
+     // echo "<br><br><br>";
 
 return $this->render('category.html.twig', array("entity" => $entity, "revisions" => $revisions, "category" => $category));
 
@@ -347,7 +329,7 @@ public function createEntity($entityname)
   else
       {
           $type = self::getType($pageid);
-          $thumbnail = self::getThumbnail($pageid);
+          $thumbnail = self::getThumbnail($entityname);
 
           //We call the Service 'databasemanager'
           $controller = $this->get('databasemanager');
@@ -524,19 +506,25 @@ public static function getType($slug)
 
 public static function getThumbnail($slug)
 {
-  $url = "http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=prefix+dbpedia%3A+%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2F%3E%0D%0Aprefix+dbpedia-owl%3A+%3Chttp%3A%2F%2Fdbpedia.org%2Fontology%2F%3E%0D%0A%0D%0Aselect+%3Fthumbnail+where+%7B+%0D%0A++dbpedia%3A".$slug."+dbpedia-owl%3Athumbnail+%3Fthumbnail+.%0D%0A%7D&format=json&CXML_redir_for_subjs=121&CXML_redir_for_hrefs=&timeout=30000&debug=on";
-
-  //var_dump($url);
+  $url = "https://en.wikipedia.org/w/api.php?action=query&titles=".$slug."&prop=pageimages&pithumbsize=700&format=json";
 
   $response = self::curl($url);
 
   $data = json_decode($response, true);
 
-  if(isset($data['results']['bindings'][0]['thumbnail']['value']))
+  if(isset($data['query']['pages']))
   {
-    $thumbnail = $data['results']['bindings'][0]['thumbnail']['value'];
-    //echo "LA THUMBNAIL : <br>".$thumbnail."<br>";
+    $value = reset($data['query']['pages']);
+
+    if(isset($value['thumbnail']['source']))
+    {$thumbnail=$value['thumbnail']['source'];}
+    else
+    {
+      $thumbnail = "unknown";
+    }
+    
   }
+
   else
   {
     $thumbnail = "unknown";
