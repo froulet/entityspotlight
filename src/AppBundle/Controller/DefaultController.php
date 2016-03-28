@@ -176,8 +176,18 @@ public function selectedEntityAction(Request $request, $entityid)
   ->getQuery()
   ->getResult();
 
+  $type = $entity->getType();
 
-  return $this->render('entity.html.twig', array("entity" => $entity, "revisions" => $revisions ));
+  $related = $em->getRepository("AppBundle:Entity")->createQueryBuilder('e')
+  ->select('e.idEntity, e.title, e.imglink')
+  ->where("e.type = '$type' AND e.idEntity != '".$entity->getIdEntity()."'")
+  ->getQuery()
+  ->setMaxResults(5)
+  ->getResult();
+
+  //var_dump($related);
+
+  return $this->render('entity.html.twig', array("entity" => $entity, "revisions" => $revisions, "related" =>$related ));
 }
 
 
@@ -193,7 +203,7 @@ public function bulkimportAction(Request $request)
 
     //Set the action attribute
     $form = $this->createFormBuilder($data, array(
-        'action' => "/add/",
+        'action' => "/bulkimport/",
     ))
     ->add('entitiesNames', TextareaType::class, array(
     'attr' => array('rows' => '10', 'class' => "textareaimport"),

@@ -32,15 +32,15 @@ margin: 0 0 1.424rem 0;
 #wheelDiv
 {
 
-	  height: 110%;
-           width: 100%;
+    height: 100%;
+    width: 100%;
 }
 
 #wheelDiv svg
 {
-	    height: 493px;
-	        max-width: 100%;
-	        top: -87px;
+height: 584px;
+max-width: 100%;
+top: -134px;
 }
 
 #search

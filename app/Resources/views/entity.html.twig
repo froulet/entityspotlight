@@ -32,11 +32,48 @@
     </div>
 
 
+    <div class="row">
+      <div class="col s12">
+                <div class="menu">
+          <div class="slider">
+            <ul>
+              <li class="category"></li>
+              {% for revision in revisions %}
+
+                {% if loop.first == true %}
+                <li class="category active"><a href="#home" revid={{revision.idRevision}}>{{revision.date |date('Y-m-d') }}</a></li>
+
+                {% else %}
+                <li class="category"><a href="#home" revid={{revision.idRevision}}>{{revision.date |date('Y-m-d') }}</a></li>
+                {% endif %}
+              {% endfor %}
+
+    {#           <li class="category active"><a href="#home">HOME</a></li>
+              <li class="category"><a href="#searc">SEARCH</a></li>
+              <li class="category"><a href="#about">ABOUT US</a></li>
+              <li class="category"><a href="#contact">CONTACT US</a></li>
+              <li class="category"><a href="#contact">fdssfdfds US</a></li> #}
+            </ul>
+            <div class="bar">
+              <div class="before"></div>
+              <a class="knob"></a>
+              <div class="after"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div class="row page-featured-posts-grid-wrapper page-featured-posts-full-width">
 
+      <h2> Similar Entities </h2>
+
       <div class="col s6" style="opacity: 1;">
+        <a href="/entity/{{related[0].idEntity}}">
+
         <article class="post-435 post type-post status-publish format-standard has-post-thumbnail hentry category-travel">
-          <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-209-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-209">
+          <img class="responsive-img" src="{{related[0].imglink}}" class="attachment-large wp-post-image" alt="emerald-209">
 {#           <header>
           <a href="http://emerald.sekizgen.net/bicycle-tour/" class="page-featured-posts-grid-link-wrapper waves-effect">
             <div class="page-featured-posts-grid-title-wrapper center-align">
@@ -45,92 +82,73 @@
           </a>
         </header> #}
       </article>
+    </a>
     </div>
 
     <div class="col s6">
 
+    <div class="col s6 min" style="opacity: 1;">
+          <a href="/entity/{{related[1].idEntity}}">
+          <article class="post-425 post type-post status-publish format-standard has-post-thumbnail hentry category-music">
+            <img class="responsive-img" src="{{related[1].imglink}}" class="attachment-large wp-post-image" alt="emerald-45">{#  <header>
+            <a href="http://emerald.sekizgen.net/cycling-songs/" class="page-featured-posts-grid-link-wrapper waves-effect">
+              <div class="page-featured-posts-grid-title-wrapper center-align">
+                <h2 class="page-featured-posts-grid-title"><strong>CYCLING</strong> SONGS</h2>
+              </div>
+            </a>
+          </header> #}
+        </article>
+      </a>
+    </div>
+
+
       <div class="col s6 min" style="opacity: 1;">
-        <article class="post-425 post type-post status-publish format-standard has-post-thumbnail hentry category-music">
-          <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-45-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-45">{#  <header>
-          <a href="http://emerald.sekizgen.net/cycling-songs/" class="page-featured-posts-grid-link-wrapper waves-effect">
+        <a href="/entity/{{related[2].idEntity}}">
+        <article class="post-340 post type-post status-publish format-standard has-post-thumbnail hentry category-lifestyle">
+          <img class="responsive-img" src="{{related[2].imglink}}" class="attachment-large wp-post-image" alt="emerald-219"> {# <header>
+          <a href="http://emerald.sekizgen.net/winter-tea/" class="page-featured-posts-grid-link-wrapper waves-effect">
             <div class="page-featured-posts-grid-title-wrapper center-align">
-              <h2 class="page-featured-posts-grid-title"><strong>CYCLING</strong> SONGS</h2>
+              <h2 class="page-featured-posts-grid-title">WINTER TEA</h2>
             </div>
           </a>
         </header> #}
       </article>
+      </a>
     </div>
 
 
-    <div class="col s6 min" style="opacity: 1;">
-      <article class="post-340 post type-post status-publish format-standard has-post-thumbnail hentry category-lifestyle">
-        <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-219-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-219"> {# <header>
-        <a href="http://emerald.sekizgen.net/winter-tea/" class="page-featured-posts-grid-link-wrapper waves-effect">
+    <div class="col s6 min3" style="opacity: 1;">
+      <a href="/entity/{{related[3].idEntity}}">
+      <article class="post-365 post type-post status-publish format-standard has-post-thumbnail hentry category-fashion">
+        <img class="responsive-img" src="{{related[3].imglink}}" class="attachment-large wp-post-image" alt="emerald-40">
+  {#       <header>
+        <a href="http://emerald.sekizgen.net/cool-stuff-for-men/" class="page-featured-posts-grid-link-wrapper waves-effect">
           <div class="page-featured-posts-grid-title-wrapper center-align">
-            <h2 class="page-featured-posts-grid-title">WINTER TEA</h2>
+            <h2 class="page-featured-posts-grid-title"><strong>COOL</strong> STUFF FOR <em>MEN</em></h2>
           </div>
         </a>
       </header> #}
     </article>
+    </a>
   </div>
 
 
   <div class="col s6 min3" style="opacity: 1;">
-    <article class="post-365 post type-post status-publish format-standard has-post-thumbnail hentry category-fashion">
-      <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-40-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-40">
-{#       <header>
-      <a href="http://emerald.sekizgen.net/cool-stuff-for-men/" class="page-featured-posts-grid-link-wrapper waves-effect">
+    <a href="/entity/{{related[4].idEntity}}">
+    <article class="post-31 post type-post status-publish format-standard has-post-thumbnail hentry category-travel tag-summer">
+      <img class="responsive-img" src="{{related[4].imglink}}" class="attachment-large wp-post-image" alt="emerald-34">
+  {#     <header>
+      <a href="http://emerald.sekizgen.net/summer-is-coming/" class="page-featured-posts-grid-link-wrapper waves-effect">
         <div class="page-featured-posts-grid-title-wrapper center-align">
-          <h2 class="page-featured-posts-grid-title"><strong>COOL</strong> STUFF FOR <em>MEN</em></h2>
+          <h2 class="page-featured-posts-grid-title"><stong>SUMMER <em>IS</em> COMING</stong></h2>
         </div>
       </a>
     </header> #}
-  </article>
-</div>
-
-
-<div class="col s6 min3" style="opacity: 1;">
-  <article class="post-31 post type-post status-publish format-standard has-post-thumbnail hentry category-travel tag-summer">
-    <img class="responsive-img" src="//emerald.sekizgen.net/wp-content/uploads/2015/07/emerald-34-1024x683.jpg" class="attachment-large wp-post-image" alt="emerald-34">
-{#     <header>
-    <a href="http://emerald.sekizgen.net/summer-is-coming/" class="page-featured-posts-grid-link-wrapper waves-effect">
-      <div class="page-featured-posts-grid-title-wrapper center-align">
-        <h2 class="page-featured-posts-grid-title"><stong>SUMMER <em>IS</em> COMING</stong></h2>
-      </div>
+    </article>
     </a>
-  </header> #}
-</article>
-</div>
+  </div>
 
 </div>
-
-    <div class="menu">
-      <div class="slider">
-        <ul>
-          <li class="category"></li>
-          {% for revision in revisions %}
-
-            {% if loop.first == true %}
-            <li class="category active"><a href="#home" revid={{revision.idRevision}}>{{revision.date |date('Y-m-d') }}</a></li>
-
-            {% else %}
-            <li class="category"><a href="#home" revid={{revision.idRevision}}>{{revision.date |date('Y-m-d') }}</a></li>
-            {% endif %}
-          {% endfor %}
-
-{#           <li class="category active"><a href="#home">HOME</a></li>
-          <li class="category"><a href="#searc">SEARCH</a></li>
-          <li class="category"><a href="#about">ABOUT US</a></li>
-          <li class="category"><a href="#contact">CONTACT US</a></li>
-          <li class="category"><a href="#contact">fdssfdfds US</a></li> #}
-        </ul>
-        <div class="bar">
-          <div class="before"></div>
-          <a class="knob"></a>
-          <div class="after"></div>
-        </div>
-      </div>
-    </div>
 
 
 </div>
