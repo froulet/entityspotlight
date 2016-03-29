@@ -64,6 +64,12 @@
       </div>
     </div>
 
+    <div class="row">
+      <div class="col s12">
+        <div id="diffs">
+        </div>
+      </div>
+    </div>
 
     <div class="row page-featured-posts-grid-wrapper page-featured-posts-full-width">
 
@@ -161,16 +167,17 @@
     <script type="text/javascript">
 
         window.onload = function () {
+          cache = null;
 
           first = $(".menu ul li.active a").first();
           idEntity = {{entity.idEntity}};
           getWheel(first.attr("revid"), idEntity);
 
           $(".menu ul li a").click(function(e) {
+                $("#diffs").html("");
                 e.preventDefault();
                 getWheel($(this).attr("revid"), idEntity);
                 $(this).slideToPos();
-                $('html, body').animate({ scrollTop: $(this.hash).offset().top }, 400);
               });
         };
 
@@ -186,7 +193,7 @@
                 for (var x = 0; x < data.length; x++) 
                 {
                 cat = data[x].categoryTitle.replace(/_/g, ' ');
-                categories.push(cat)
+                categories.push(String(cat))
                 }
 
             var wheel = new wheelnav("wheelDiv");
@@ -199,20 +206,59 @@
 
             wheel.createWheel(categories);
 
+            checkcache(categories);
+
             wheel.navItems.forEach(function(entry) {
-              console.log(entry);
               entry.navigateFunction = function () {
-                console.log(entry.title);
+                
                 window.location.href = "/entity/"+idEntity+"/"+entry.title.replace(/ /g,"_");
               };
           });
 
-
-
-
             }
          });
+        } 
+
+        function checkcache(categories)
+        {
+            if(cache != null)
+            {
+              var diff = categories.diff(cache);
+              //console.log(diff);
+              checkAddOrDeletion(diff, categories);
+            }
+
+            cache = categories;
         }
+
+        function checkAddOrDeletion(diff, categories)
+        {
+              for(var x = 0; x < diff.length; x++)
+              {
+                if($.inArray(diff[x], categories) != -1)
+                {
+                  $("#diffs").append("<div class='card-panel green'> <b> + </b> <a href='/entity/"+idEntity+"/"+diff[x].replace(/ /g,"_")+"'>"+diff[x]+"</a></div>");
+                }
+
+                else
+                {
+                  $("#diffs").append("<div class='card-panel red accent-4'><b> - </b><a href='/entity/"+idEntity+"/"+diff[x].replace(/ /g,"_")+"'>"+diff[x]+"</a></div>");                 
+                }
+              }
+        }
+
+       Array.prototype.diff = function (arr) {
+
+        // Merge the arrays
+        var mergedArr = this.concat(arr);
+
+        // Get the elements which are unique in the array
+        // Return the diff array
+        return mergedArr.filter(function (e) {
+            // Check if the element is appearing only once
+            return mergedArr.indexOf(e) === mergedArr.lastIndexOf(e);
+        });
+      };
 
     </script>
 

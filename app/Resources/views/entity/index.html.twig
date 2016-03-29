@@ -10,12 +10,11 @@
 
 
                 <div class="row">
-                <th>Identity</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Description</th>
-                <th>Imglink</th>
-                <th>Actions</th>
+                <div class="col s2"><h5>Identity</h5></div>
+                <div class="col s3"><h5>Title</h5></div>
+                <div class="col s2"><h5>Type</h5></div>
+                <div class="col s2"><h5>Description</h5></div>
+                <div class="col s3"><h5>Actions</h5></div>
                 </div>
 
         {% for entity in entities %}
@@ -23,8 +22,8 @@
                 <div class="col s2">
                 <a href="{{ path('entity_show', { 'id': entity.idEntity }) }}">{{ entity.idEntity }}</a>
                 </div>
-                <div class="col s2">
-                {{ entity.title }}
+                <div class="col s3">
+                {{ entity.title |slice(0, 20) ~ '...' }}
                 </div>
                 <div class="col s2">
                 {{ entity.type |slice(0, 10) ~ '...'}}
