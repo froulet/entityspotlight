@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use AppBundle\Entity\Entity;
 use AppBundle\Entity\Revision;
 use AppBundle\Form\EntityImport;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -208,6 +209,12 @@ public function bulkimportAction(Request $request)
     ->add('entitiesNames', TextareaType::class, array(
     'attr' => array('rows' => '10', 'class' => "textareaimport"),
     ))
+    ->add('start',TextType::class, array(
+     'data' => '20130101000000'
+    ))
+    ->add('end',TextType::class, array(
+     'data' => '20160101000000'
+    ))
     ->add('save', SubmitType::class)
     ->getForm();
 
@@ -216,6 +223,8 @@ public function bulkimportAction(Request $request)
     //If some data is submit
     if ($form->isValid()) {
         $data = $form->getData();
+        $start = $data['start'];
+        $end = $data['end'];
         //We filter out number and special character
         $parts = explode("\n", $data['entitiesNames']);
         print_r($parts);
@@ -229,7 +238,7 @@ public function bulkimportAction(Request $request)
             $output = preg_replace( '/[^A-Za-z\~\\s\|]/', '', $value);
             $value = preg_replace( '/\\s/', '_', trim($output));
             echo "<br>".$value;
-            $callback=$this->parseEntities($value, "20130101000000", "20160101000000", "500", "no");
+            $callback=$this->parseEntities($value, $start, $end, "500", "no");
 
             //Stock the result (if import has succeeded or failed) in an array
             $imported[$value] = $callback;
@@ -305,78 +314,22 @@ public static function get1Revisions($data)
 }
 
 
-// public static function checkContinue($data)
-// {
-//     (isset($data["continue"]["rvcontinue"])) ? $cont = $data["continue"]["rvcontinue"] : $cont = null;
-
-//     return $cont;
-// }
-
-
-// public static function addContinue($continue, $url)
-// {
-//   if($continue != null && $continue != 'n')
-//   {
-//     $url = $url."&rvcontinue=".$continue;
-//   }
-
-//   return $url;
-// }
-
-
 
 public function createEntity($entityname)
 {
 
-  list($pageid, $extract)=self::getDescription($entityname);
+  $extract = self::getDescription($entityname);
 
-  if($pageid == null)
-  {
-    echo "<br><b>Entity ".$pageid." not found.<b><br>";
-    return 0;
-  }
+  list($pageid,$thumbnail) = self::getThumbnail($entityname);
 
-  else
-      {
           $type = self::getType($pageid);
-          $thumbnail = self::getThumbnail($entityname);
-
           //We call the Service 'databasemanager'
           $controller = $this->get('databasemanager');
           $controller->createEntity($pageid, $entityname, $type, $extract, $thumbnail);
-        }
+
 
   return $pageid;
 }
-
-
-
-public function createRevision($title)
-{
-
-  list($pageid, $extract)=self::getDescription($title);
-
-  if($pageid == null)
-  {
-    echo "<br><b>Entity ".$title." not found.<b><br>";
-    return 0;
-  }
-
-  else
-      {
-          $type = self::getType($title);
-          $thumbnail = self::getThumbnail($title);
-
-          //We call the Service 'databasemanager'
-          $controller = $this->get('databasemanager');
-          $controller->createEntity($pageid, $title, $type, $extract, $thumbnail);
-        }
-
-  return $pageid;
-}
-
-
-
 
 
 
@@ -384,7 +337,7 @@ public function createRevision($title)
 public function parseEntities($entityname, $start, $end, $limit, $continue)
 {           
 
-         $entityid= $this->createRevision($entityname);
+         $entityid= $this->createEntity($entityname);
 
          if($entityid == 0)
          {
@@ -438,16 +391,15 @@ public static function getDescription($slug){
 
       //echo "<br><br>LE EPIC EXTRACT <br>".$extract;
       
-      $lereturn = array($pageid, $extract);
   }
 
   else
     {
-        $lereturn = array(null, null);
+       $extract = "Not Found";
     }
 
 
-  return $lereturn;
+  return $extract;
 }
 
 
@@ -527,10 +479,13 @@ public static function getThumbnail($slug)
     $value = reset($data['query']['pages']);
 
     if(isset($value['thumbnail']['source']))
-    {$thumbnail=$value['thumbnail']['source'];}
+    {$thumbnail=$value['thumbnail']['source'];
+     $pageid=$value['pageid'];
+    }
     else
     {
       $thumbnail = "unknown";
+      $pageid = null;
     }
     
   }
@@ -538,9 +493,10 @@ public static function getThumbnail($slug)
   else
   {
     $thumbnail = "unknown";
+    $pageid = null;
   }
 
-  return $thumbnail;
+  return array($pageid, $thumbnail);
 
 }
 

@@ -17,18 +17,9 @@ function playRevision(data, svg_area, silent) {
 
     if(data.categories != null)
     {
-        let str = data.timestamp + data.categories;
-        changes_rc(data.timestamp, data.categories, 4);
-        play_random_swell();
+        displayCatChanges(data.categories, data.timestamp);
     }
 
-    categoriescache = data.categories;
-
-    // if (/\[\[Cat/.test(data['*'])) {
-    //     console.log('Cat présente');
-    // }
-
-    console.log(data.userid);
 
     if (data.userid == 0) {
          type = 'anon';
@@ -251,7 +242,7 @@ var log_rc = function(rc_str, limit) {
 
 //Add a log
 var changes_rc = function(date, rc_str, limit) {
-  console.log("OKKK ! changes_rc");
+
 
     $('#changes-rc').prepend("<li>"+rc_str+"<span class='note'>" + date + "</span></li>");
 
@@ -266,13 +257,6 @@ var changes_rc = function(date, rc_str, limit) {
 
 
 
-/*
-var rate_bg = svg.append('rect')
-    .attr('opacity', 0.0)
-    .attr('fill', 'rgb(41, 128, 185)')
-    .attr('width', width)
-    .attr('height', height)
-*/
 function play_sound(size, type, volume) {
     var max_pitch = 100.0;
     var log_used = 1.0715307808111486871978099;
@@ -471,4 +455,45 @@ function arrayDiff(a1, a2) {
   }
 
   return Object.keys(diff);
+}
+
+
+
+function displayCatChanges(categories, timestamp)
+{
+        checkcache(categories, timestamp);
+
+        play_random_swell();
+
+        catcache = categories;
+}
+
+function checkcache(categories, timestamp)
+{
+    if(catcache != null)
+    {
+        var diff = categories.diff(catcache);
+        checkAddOrDeletion(diff, categories, timestamp);
+    }
+
+}
+
+
+
+function checkAddOrDeletion(diff, categories, timestamp)
+{
+    for(var x = 0; x < diff.length; x++)
+        {
+        if(isAddOrDeletion(diff[x], categories))
+        {
+            mess = "<div class='card-panel green'> <b> + </b> "+diff[x]+"</div>"    
+        }
+
+        else
+        {
+            mess = "<div class='card-panel red'> <b> - </b> "+diff[x]+"</div>"         
+        }
+
+        changes_rc(timestamp, mess, 4);
+    }
 }
